@@ -113,7 +113,10 @@ class Serializer(object):
                         raise AttributeError("Packet length %s, pos %s" % (length_packet, pos))
                     message.payload = ""
                     payload = values[pos:]
-                    message.payload = payload.decode("utf-8")
+                    if message.payload_type == defines.Content_types["application/octet-stream"]:
+                        message.payload = payload
+                    else:
+                        message.payload = payload.decode("utf-8")
                     pos += len(payload)
 
             return message
