@@ -165,6 +165,13 @@ class CoAP(object):
                 if not self._cb_ignore_write_exception(e, self):
                     raise
 
+        # if you're explicitly setting that you don't want a response, don't wait for it
+        # https://tools.ietf.org/html/rfc7967#section-2.1
+        for opt in message.options:
+            if opt.number == defines.OptionRegistry.NO_RESPONSE.number:
+                if opt.value == 26:
+                    return
+
         if self._receiver_thread is None or not self._receiver_thread.isAlive():
             self._receiver_thread = threading.Thread(target=self.receive_datagram)
             self._receiver_thread.start()
