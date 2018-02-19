@@ -187,6 +187,16 @@ class Request(Message):
         option.value = None
         self.add_option(option)
 
+    def add_no_response(self):
+        """
+        Add the no-response option to the request
+        # https://tools.ietf.org/html/rfc7967#section-2.1
+        """
+        option = Option()
+        option.number = defines.OptionRegistry.NO_RESPONSE.number
+        option.value = 26
+        self.add_option(option)
+
     @if_none_match.deleter
     def if_none_match(self):
         """

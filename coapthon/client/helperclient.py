@@ -134,7 +134,7 @@ class HelperClient(object):
 
         return self.send_request(request, callback, timeout)
 
-    def post(self, path, payload, callback=None, timeout=None, **kwargs):  # pragma: no cover
+    def post(self, path, payload, callback=None, timeout=None, no_response=False, **kwargs):  # pragma: no cover
         """
         Perform a POST on a certain path.
 
@@ -148,13 +148,17 @@ class HelperClient(object):
         request.token = generate_random_token(2)
         request.payload = payload
 
+        if no_response:
+            request.add_no_response()
+            request.type = defines.Types["NON"]
+
         for k, v in kwargs.items():
             if hasattr(request, k):
                 setattr(request, k, v)
 
-        return self.send_request(request, callback, timeout)
+        return self.send_request(request, callback, timeout, no_response=no_response)
 
-    def put(self, path, payload, callback=None, timeout=None, **kwargs):  # pragma: no cover
+    def put(self, path, payload, callback=None, timeout=None, no_response=False, **kwargs):  # pragma: no cover
         """
         Perform a PUT on a certain path.
 
@@ -168,11 +172,15 @@ class HelperClient(object):
         request.token = generate_random_token(2)
         request.payload = payload
 
+        if no_response:
+            request.add_no_response()
+            request.type = defines.Types["NON"]
+
         for k, v in kwargs.items():
             if hasattr(request, k):
                 setattr(request, k, v)
 
-        return self.send_request(request, callback, timeout)
+        return self.send_request(request, callback, timeout, no_response=no_response)
 
     def discover(self, callback=None, timeout=None, **kwargs):  # pragma: no cover
         """
@@ -190,7 +198,7 @@ class HelperClient(object):
 
         return self.send_request(request, callback, timeout)
 
-    def send_request(self, request, callback=None, timeout=None):  # pragma: no cover
+    def send_request(self, request, callback=None, timeout=None, no_response=False):  # pragma: no cover
         """
         Send a request to the remote server.
 
@@ -204,6 +212,8 @@ class HelperClient(object):
             thread.start()
         else:
             self.protocol.send_message(request)
+            if no_response:
+                return
             try:
                 response = self.queue.get(block=True, timeout=timeout)
             except Empty:
