@@ -169,6 +169,7 @@ class CoAP(object):
 
         if self._receiver_thread is None or not self._receiver_thread.isAlive():
             self._receiver_thread = threading.Thread(target=self.receive_datagram)
+            self._receiver_thread.daemon = True
             self._receiver_thread.start()
 
     def _start_retransmission(self, transaction, message):
