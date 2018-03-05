@@ -219,8 +219,12 @@ class Serializer(object):
             fmt += "B"
             values.append(defines.PAYLOAD_MARKER)
 
-            fmt += str(len(bytes(payload, "utf-8"))) + "s"
-            values.append(bytes(payload, "utf-8"))
+            if isinstance(payload, bytes):
+                fmt += str(len(payload)) + "s"
+                values.append(payload)
+            else:
+                fmt += str(len(bytes(payload, "utf-8"))) + "s"
+                values.append(bytes(payload, "utf-8"))
             # for b in str(payload):
             #     fmt += "c"
             #     values.append(bytes(b, "utf-8"))
