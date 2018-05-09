@@ -79,16 +79,10 @@ class CoAP(object):
             # Join group
             if addrinfo[0] == socket.AF_INET:  # IPv4
                 self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-
-                # Allow multiple copies of this program on one machine
-                # (not strictly needed)
                 self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self._socket.bind((defines.ALL_COAP_NODES, self.server_address[1]))
+                self._socket.bind(('', self.server_address[1]))
                 mreq = struct.pack("4sl", socket.inet_aton(defines.ALL_COAP_NODES), socket.INADDR_ANY)
                 self._socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
-                self._unicast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                self._unicast_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self._unicast_socket.bind(self.server_address)
             else:
                 self._socket = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 
@@ -104,7 +98,6 @@ class CoAP(object):
                 self._unicast_socket = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
                 self._unicast_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 self._unicast_socket.bind(self.server_address)
-
         else:
             if addrinfo[0] == socket.AF_INET:  # IPv4
                 self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -252,10 +245,7 @@ class CoAP(object):
             logger.debug("send_datagram - " + str(message))
             serializer = Serializer()
             message = serializer.serialize(message)
-            if self.multicast:
-                self._unicast_socket.sendto(message, (host, port))
-            else:
-                self._socket.sendto(message, (host, port))
+            self._socket.sendto(message, (host, port))
 
     def add_resource(self, path, resource):
         """
