@@ -14,18 +14,13 @@ from coapthon.messages.message import Message
 from coapthon.messages.request import Request
 from coapthon.messages.response import Response
 from coapthon.serializer import Serializer
-from coapthon.utils import create_logging
 import collections
 
 
 __author__ = 'Giacomo Tanganelli'
 
 
-if not os.path.isfile("logging.conf"):
-    create_logging()
-
 logger = logging.getLogger(__name__)
-logging.config.fileConfig("logging.conf", disable_existing_loggers=False)
 
 
 class CoAP(object):
@@ -165,8 +160,16 @@ class CoAP(object):
                 if not self._cb_ignore_write_exception(e, self):
                     raise
 
+        # if you're explicitly setting that you don't want a response, don't wait for it
+        # https://tools.ietf.org/html/rfc7967#section-2.1
+        for opt in message.options:
+            if opt.number == defines.OptionRegistry.NO_RESPONSE.number:
+                if opt.value == 26:
+                    return
+
         if self._receiver_thread is None or not self._receiver_thread.isAlive():
             self._receiver_thread = threading.Thread(target=self.receive_datagram)
+            self._receiver_thread.daemon = True
             self._receiver_thread.start()
 
     def _start_retransmission(self, transaction, message):
