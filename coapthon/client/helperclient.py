@@ -239,6 +239,8 @@ class HelperClient(object):
                     if response is not None:
                         if response.mid == request.mid:
                             return response
+                        if response.type == defines.Types["NON"]:
+                            return response
                     else:
                         return response
             except Empty:
