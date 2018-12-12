@@ -234,7 +234,13 @@ class HelperClient(object):
             if no_response:
                 return
             try:
-                response = self.queue.get(block=True, timeout=timeout)
+                while True:
+                    response = self.queue.get(block=True, timeout=timeout)
+                    if response is not None:
+                        if response.mid == request.mid:
+                            return response
+                    else:
+                        return response
             except Empty:
                 #if timeout is set
                 response = None
