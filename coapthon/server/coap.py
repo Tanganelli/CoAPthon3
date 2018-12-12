@@ -273,8 +273,6 @@ class CoAP(object):
             except KeyError:
                 res = None
             if res is None:
-                if len(paths) != i:
-                    return False
                 resource.path = actual_path
                 self.root[actual_path] = resource
         return True
