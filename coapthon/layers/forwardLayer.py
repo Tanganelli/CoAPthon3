@@ -50,11 +50,12 @@ class ForwardLayer(object):
         :rtype : Transaction
         :return: the edited transaction
         """
+        wkc_resource_is_defined = defines.DISCOVERY_URL in self._server.root
         path = str("/" + transaction.request.uri_path)
         transaction.response = Response()
         transaction.response.destination = transaction.request.source
         transaction.response.token = transaction.request.token
-        if path == defines.DISCOVERY_URL:
+        if path == defines.DISCOVERY_URL and not wkc_resource_is_defined:
             transaction = self._server.resourceLayer.discover(transaction)
         else:
             new = False
