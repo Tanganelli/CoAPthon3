@@ -99,6 +99,24 @@ class HelperClient(object):
 
         return self.send_request(request, callback, timeout)
 
+    def get_non(self, path, callback=None, timeout=None, **kwargs):  # pragma: no cover
+        """
+        Perform a GET on a certain path.
+
+        :param path: the path
+        :param callback: the callback function to invoke upon response
+        :param timeout: the timeout of the request
+        :return: the response
+        """
+        request = self.mk_request_non(defines.Codes.GET, path)
+        request.token = generate_random_token(2)
+
+        for k, v in kwargs.items():
+            if hasattr(request, k):
+                setattr(request, k, v)
+
+        return self.send_request(request, callback, timeout)
+
     def observe(self, path, callback, timeout=None, **kwargs):  # pragma: no cover
         """
         Perform a GET with observe on a certain path.
@@ -241,6 +259,21 @@ class HelperClient(object):
         request.destination = self.server
         request.code = method.number
         request.uri_path = path
+        return request
+
+    def mk_request_non(self, method, path):
+        """
+        Create a request.
+
+        :param method: the CoAP method
+        :param path: the path of the request
+        :return:  the request
+        """
+        request = Request()
+        request.destination = self.server
+        request.code = method.number
+        request.uri_path = path
+        request.type = defines.Types["NON"]
         return request
 
 
