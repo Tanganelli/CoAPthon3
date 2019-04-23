@@ -51,7 +51,7 @@ if __name__ == '__main__':
     ping_cnt = 0    # global ping cnt
 
     print('COAP ping script')
-    print(('COAP ping to: %s:%s...' % (host, port)))
+    print('COAP ping to: %s:%s...' % (host, port))
 
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -69,8 +69,8 @@ if __name__ == '__main__':
         msg += struct.pack("B", ping_no)
 
         try :
-            print(('[0x%08X] Send ping:' % (ping_cnt), [hex(ord(c)) for c in msg]))
-            #Set the whole string
+            print('[0x%08X] Send ping:' % (ping_cnt), [hex(ord(c)) for c in msg])
+            # Set the whole string
             s.sendto(msg, (host, port))
             s.settimeout(2 + sleep_sec)
 
@@ -81,11 +81,10 @@ if __name__ == '__main__':
 
             # We need to check if ping peyload counter is the same in reply
             status = bytes(msg)[3] == bytes(reply)[3]
-            print(('[0x%08X] Recv ping:' % (ping_cnt), [hex(ord(c)) for c in reply], 'ok' if status else 'fail'))
+            print('[0x%08X] Recv ping:' % (ping_cnt), [hex(ord(c)) for c in reply], 'ok' if status else 'fail')
 
         except socket.error as e:
-            print(('Error: socket.error: ', str(e)))
-            #print 'Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
+            print('Error: socket.error: ', str(e))
             sleep(3)    # Waiting to recover ;)
         except socket.timeout:
             print("Error: closing socket")

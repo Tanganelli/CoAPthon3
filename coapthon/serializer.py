@@ -200,7 +200,6 @@ class Serializer(object):
                 elif opt_type == defines.STRING:
                     fmt += str(len(bytes(option.value, "utf-8"))) + "s"
                     values.append(bytes(option.value, "utf-8"))
-
                 else:  # OPAQUE
                     for b in option.value:
                         fmt += "B"
@@ -225,9 +224,6 @@ class Serializer(object):
             else:
                 fmt += str(len(bytes(payload, "utf-8"))) + "s"
                 values.append(bytes(payload, "utf-8"))
-            # for b in str(payload):
-            #     fmt += "c"
-            #     values.append(bytes(b, "utf-8"))
 
         datagram = None
         if values[1] is None:

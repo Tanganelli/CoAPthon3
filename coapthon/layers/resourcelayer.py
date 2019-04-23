@@ -229,7 +229,7 @@ class ResourceLayer(object):
         lp = path
         parent_resource = self._parent.root[imax]
         if parent_resource.allow_children:
-                return self.add_resource(transaction, parent_resource, lp)
+            return self.add_resource(transaction, parent_resource, lp)
         else:
             transaction.response.code = defines.Codes.METHOD_NOT_ALLOWED.number
             return transaction

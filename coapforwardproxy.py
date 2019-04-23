@@ -11,7 +11,7 @@ class CoAPForwardProxy(CoAP):
     def __init__(self, host, port,  multicast=False, cache=False):
         CoAP.__init__(self, (host, port), multicast=multicast, cache=cache)
 
-        print(("CoAP Proxy start on " + host + ":" + str(port)))
+        print("CoAP Proxy start on " + host + ":" + str(port))
 
 
 def usage():  # pragma: no cover

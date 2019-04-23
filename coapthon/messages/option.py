@@ -73,7 +73,6 @@ class Option(object):
             else:
                 if value is not None:
                     value = bytes(value, "utf-8")
-
         self._value = value
 
     @property

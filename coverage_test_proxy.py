@@ -105,8 +105,8 @@ class Tests(unittest.TestCase):
             if expected is not None:
                 datagram, source = sock.recvfrom(4096)
                 received_message = serializer.deserialize(datagram, source)
-                print((received_message.pretty_print()))
-                print((expected.pretty_print()))
+                print(received_message.pretty_print())
+                print(expected.pretty_print())
                 if expected.type is not None:
                     self.assertEqual(received_message.type, expected.type)
                 if expected.mid is not None:

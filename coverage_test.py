@@ -1138,7 +1138,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = "<value>0</value>"
 
-        print((expected.pretty_print()))
+        print(expected.pretty_print())
 
         exchange7 = (req, expected)
         self.current_mid += 1
