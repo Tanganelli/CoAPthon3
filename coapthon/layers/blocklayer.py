@@ -33,10 +33,10 @@ class BlockLayer(object):
     Handle the Blockwise options. Hides all the exchange to both servers and clients.
     """
     def __init__(self):
-        self._block1_sent = {}
-        self._block2_sent = {}
-        self._block1_receive = {}
-        self._block2_receive = {}
+        self._block1_sent = {}  # type: dict[hash, BlockItem]
+        self._block2_sent = {}  # type: dict[hash, BlockItem]
+        self._block1_receive = {}  # type: dict[hash, BlockItem]
+        self._block2_receive = {}  # type: dict[hash, BlockItem]
 
     def receive_request(self, transaction):
         """
