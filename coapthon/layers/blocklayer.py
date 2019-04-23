@@ -67,7 +67,11 @@ class BlockLayer(object):
             host, port = transaction.request.source
             key_token = hash(str(host) + str(port) + str(transaction.request.token))
             num, m, size = transaction.request.block1
+            if transaction.request.size1 is not None:
+                # What to do if the size1 is larger than the maximum resource size or the maxium server buffer
+                pass
             if key_token in self._block1_receive:
+                # n-th block
                 content_type = transaction.request.content_type
                 if num != self._block1_receive[key_token].num \
                         or content_type != self._block1_receive[key_token].content_type:
@@ -145,6 +149,8 @@ class BlockLayer(object):
             else:
                 item.m = 1
             request.block1 = (item.num, item.m, item.size)
+            # The original request already has this option set
+            # request.size1 = len(item.payload)
         elif transaction.response.block2 is not None:
 
             num, m, size = transaction.response.block2
@@ -225,10 +231,13 @@ class BlockLayer(object):
 
                 self._block2_receive[key_token] = BlockItem(byte, num, m, size)
 
-            if len(transaction.response.payload) > (byte + size):
-                m = 1
-            else:
-                m = 0
+            # correct m
+            m = 0 if ((num * size) + size) > len(transaction.response.payload) else 1
+            # add size2 if requested or if payload is bigger than one datagram
+            del transaction.response.size2
+            if (transaction.request.size2 is not None and transaction.request.size2 == 0) or \
+               (transaction.response.payload is not None and len(transaction.response.payload) > defines.MAX_PAYLOAD):
+                transaction.response.size2 = len(transaction.response.payload)
             transaction.response.payload = transaction.response.payload[byte:byte + size]
             del transaction.response.block2
             transaction.response.block2 = (num, m, size)
@@ -258,7 +267,10 @@ class BlockLayer(object):
                 num = 0
                 m = 1
                 size = defines.MAX_PAYLOAD
-
+            # correct m
+            m = 0 if ((num * size) + size) > len(request.payload) else 1
+            del request.size1
+            request.size1 = len(request.payload)
             self._block1_sent[key_token] = BlockItem(size, num, m, size, request.payload, request.content_type)
             request.payload = request.payload[0:size]
             del request.block1

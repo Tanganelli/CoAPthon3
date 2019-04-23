@@ -566,6 +566,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (0, 1, 1024)
+        expected.size2 = 1990
 
         exchange1 = (req, expected)
         self.current_mid += 1
@@ -586,6 +587,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (1, 0, 1024)
+        expected.size2 = 1990
 
         exchange2 = (req, expected)
         self.current_mid += 1
@@ -632,6 +634,7 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
  when I first awoke, I could hardly tell it from the quilt, they so blended their hues together; and it was only by
  the sense of weight and pressure that I could tell that Queequeg was hugging"""
         expected.block2 = (1, 0, 1024)
+        expected.size2 = 1990
 
         exchange1 = (req, expected)
         self.current_mid += 1
@@ -677,6 +680,7 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
  when I first awoke, I could hardly tell it from the quilt, they so blended their hues together; and it was only by
  the sense of weight and pressure that I could tell that Queequeg was hugging"""
         expected.block2 = (1, 0, 1024)
+        expected.size2 = 1990
 
         exchange1 = (req, expected)
         self.current_mid += 1
@@ -702,6 +706,7 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
         expected.token = None
         expected.payload = None
         expected.block2 = (0, 1, 1024)
+        expected.size2 = 1990
 
         exchange1 = (req, expected)
         self.current_mid += 1
@@ -722,6 +727,7 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
         expected.token = None
         expected.payload = None
         expected.block2 = (1, 0, 1024)
+        expected.size2 = 1990
 
         exchange2 = (req, expected)
         self.current_mid += 1

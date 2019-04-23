@@ -642,6 +642,44 @@ class Message(object):
         self.del_option_by_number(defines.OptionRegistry.BLOCK2.number)
 
     @property
+    def size1(self):
+        value = None
+        for option in self.options:
+            if option.number == defines.OptionRegistry.SIZE1.number:
+                value = option.value if option.value is not None else 0
+        return value
+
+    @size1.setter
+    def size1(self, value):
+        option = Option()
+        option.number = defines.OptionRegistry.SIZE1.number
+        option.value = value
+        self.add_option(option)
+
+    @size1.deleter
+    def size1(self):
+        self.del_option_by_number(defines.OptionRegistry.SIZE1.number)
+
+    @property
+    def size2(self):
+        value = None
+        for option in self.options:
+            if option.number == defines.OptionRegistry.SIZE2.number:
+                value = option.value if option.value is not None else 0
+        return value
+
+    @size2.setter
+    def size2(self, value):
+        option = Option()
+        option.number = defines.OptionRegistry.SIZE2.number
+        option.value = value
+        self.add_option(option)
+
+    @size2.deleter
+    def size2(self):
+        self.del_option_by_number(defines.OptionRegistry.SIZE2.number)
+
+    @property
     def line_print(self):
         """
         Return the message as a one-line string.

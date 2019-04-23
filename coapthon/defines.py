@@ -124,6 +124,7 @@ class OptionRegistry(object):
     LOCATION_QUERY = OptionItem(20,"Location-Query",STRING,  True, None)
     BLOCK2 =        OptionItem(23, "Block2",        INTEGER, False, None)
     BLOCK1 =        OptionItem(27, "Block1",        INTEGER, False, None)
+    SIZE2 =         OptionItem(28, "Size2",         INTEGER, False, None)
     PROXY_URI =     OptionItem(35, "Proxy-Uri",     STRING,  False, None)
     PROXY_SCHEME =  OptionItem(39, "Proxy-Schema",  STRING,  False, None)
     SIZE1 =         OptionItem(60, "Size1",         INTEGER, False, None)
@@ -147,6 +148,7 @@ class OptionRegistry(object):
         20: LOCATION_QUERY,
         23: BLOCK2,
         27: BLOCK1,
+        28: SIZE2,
         35: PROXY_URI,
         39: PROXY_SCHEME,
         60: SIZE1,

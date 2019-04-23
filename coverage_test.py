@@ -543,6 +543,27 @@ class Tests(unittest.TestCase):
         req._mid = self.current_mid
         req.destination = self.server_address
         req.payload = None
+        # req.block2 = (0, 0, 512)
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = None
+        expected.code = defines.Codes.CONTENT.number
+        expected.token = None
+        expected.payload = None
+        expected.block2 = (0, 1, defines.MAX_PAYLOAD)
+        expected.size2 = 2041
+
+        exchange0 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.GET.number
+        req.uri_path = path
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        req.payload = None
         req.block2 = (0, 0, 512)
 
         expected = Response()
@@ -552,6 +573,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (0, 1, 512)
+        expected.size2 = 2041
 
         exchange1 = (req, expected)
         self.current_mid += 1
@@ -572,6 +594,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (1, 1, 256)
+        expected.size2 = 2041
 
         exchange2 = (req, expected)
         self.current_mid += 1
@@ -592,6 +615,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (2, 1, 128)
+        expected.size2 = 2041
 
         exchange3 = (req, expected)
         self.current_mid += 1
@@ -612,6 +636,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (3, 1, 64)
+        expected.size2 = 2041
 
         exchange4 = (req, expected)
         self.current_mid += 1
@@ -632,6 +657,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (4, 1, 32)
+        expected.size2 = 2041
 
         exchange5 = (req, expected)
         self.current_mid += 1
@@ -652,6 +678,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (5, 1, 16)
+        expected.size2 = 2041
 
         exchange6 = (req, expected)
         self.current_mid += 1
@@ -671,7 +698,8 @@ class Tests(unittest.TestCase):
         expected.code = defines.Codes.CONTENT.number
         expected.token = None
         expected.payload = None
-        expected.block2 = (6, 1, 1024)
+        expected.block2 = (6, 0, 1024)
+        expected.size2 = 2041
 
         exchange7 = (req, expected)
         self.current_mid += 1
@@ -692,11 +720,12 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (7, 0, 1024)
+        expected.size2 = 2041
 
         exchange8 = (req, expected)
         self.current_mid += 1
 
-        self._test_plugtest([exchange1, exchange2, exchange3, exchange4, exchange5, exchange6, exchange7, exchange8])
+        self._test_plugtest([exchange0, exchange1, exchange2, exchange3, exchange4, exchange5, exchange6, exchange7, exchange8])
 
     def test_post_block_big(self):
         print("TEST_POST_BLOCK_BIG")

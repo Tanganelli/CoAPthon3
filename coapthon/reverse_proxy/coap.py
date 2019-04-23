@@ -81,6 +81,8 @@ class CoAP(object):
             # Use given socket, could be a DTLS socket
             self._socket = sock
 
+            self.parse_config()
+
         elif self.multicast:  # pragma: no cover
 
             # Create a socket
@@ -94,19 +96,24 @@ class CoAP(object):
                 # Allow multiple copies of this program on one machine
                 # (not strictly needed)
                 self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self._socket.bind((defines.ALL_COAP_NODES, self.server_address[1]))
+                self._socket.bind(('', self.server_address[1]))
+
                 mreq = struct.pack("4sl", socket.inet_aton(defines.ALL_COAP_NODES), socket.INADDR_ANY)
                 self._socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
                 self._unicast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 self._unicast_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 self._unicast_socket.bind(self.server_address)
             else:
+                # Bugfix for Python 3.6 for Windows ... missing IPPROTO_IPV6 constant
+                if not hasattr(socket, 'IPPROTO_IPV6'):
+                    socket.IPPROTO_IPV6 = 41
+
                 self._socket = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 
                 # Allow multiple copies of this program on one machine
                 # (not strictly needed)
                 self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self._socket.bind((defines.ALL_COAP_NODES_IPV6, self.server_address[1]))
+                self._socket.bind(('', self.server_address[1]))
 
                 addrinfo_multicast = socket.getaddrinfo(defines.ALL_COAP_NODES_IPV6, 5683)[0]
                 group_bin = socket.inet_pton(socket.AF_INET6, addrinfo_multicast[4][0])
@@ -251,7 +258,7 @@ class CoAP(object):
         self.stopped.set()
         for event in self.to_be_stopped:
             event.set()
-        self._socket.close()
+        # self._socket.close()
 
     def receive_datagram(self, args):
         """

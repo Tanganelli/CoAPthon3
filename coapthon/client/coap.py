@@ -75,7 +75,7 @@ class CoAP(object):
             event.set()
         if self._receiver_thread is not None:
             self._receiver_thread.join()
-        self._socket.close()
+        # self._socket.close()
 
     @property
     def current_mid(self):
@@ -290,6 +290,7 @@ class CoAP(object):
                 self._messageLayer.receive_empty(message)
 
         logger.debug("Exiting receiver Thread due to request")
+        self._socket.close()
 
     def _send_ack(self, transaction):
         """
