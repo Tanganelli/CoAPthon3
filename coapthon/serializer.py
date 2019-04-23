@@ -1,6 +1,7 @@
 import logging
 import struct
 import ctypes
+
 from coapthon.messages.request import Request
 from coapthon.messages.response import Response
 from coapthon.messages.option import Option
@@ -263,28 +264,6 @@ class Serializer(object):
         return defines.RESPONSE_CODE_LOWER_BOUND <= code <= defines.RESPONSE_CODE_UPPER_BOUND
 
     @staticmethod
-    def read_option_value_from_nibble(nibble, pos, values):
-        """
-        Calculates the value used in the extended option fields.
-
-        :param nibble: the 4-bit option header value.
-        :return: the value calculated from the nibble and the extended option value.
-        """
-        if nibble <= 12:
-            return nibble, pos
-        elif nibble == 13:
-            tmp = struct.unpack("!B", values[pos].to_bytes(1, "big"))[0] + 13
-            pos += 1
-            return tmp, pos
-        elif nibble == 14:
-            s = struct.Struct("!H")
-            tmp = s.unpack_from(values[pos:].to_bytes(2, "big"))[0] + 269
-            pos += 2
-            return tmp, pos
-        else:
-            raise AttributeError("Unsupported option nibble " + str(nibble))
-
-    @staticmethod
     def read_option_value_len_from_byte(byte, pos, values):
         """
         Calculates the value and length used in the extended option fields.
@@ -303,7 +282,7 @@ class Serializer(object):
             pos += 1
         elif h_nibble == 14:
             s = struct.Struct("!H")
-            value = s.unpack_from(values[pos:].to_bytes(2, "big"))[0] + 269
+            value = s.unpack_from(values[pos:pos+2])[0] + 269
             pos += 2
         else:
             raise AttributeError("Unsupported option number nibble " + str(h_nibble))
@@ -315,7 +294,7 @@ class Serializer(object):
             pos += 1
         elif l_nibble == 14:
             s = struct.Struct("!H")
-            length = s.unpack_from(values[pos:].to_bytes(2, "big"))[0] + 269
+            length = s.unpack_from(values[pos:pos+2])[0] + 269
             pos += 2
         else:
             raise AttributeError("Unsupported option length nibble " + str(l_nibble))

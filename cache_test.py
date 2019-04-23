@@ -1,8 +1,9 @@
 from queue import Queue
 import random
-import socket
 import threading
 import unittest
+import time
+
 from coapclient import HelperClient
 from coapforwardproxy import CoAPForwardProxy
 from coapserver import CoAPServer
@@ -10,8 +11,6 @@ from coapthon import defines
 from coapthon.messages.option import Option
 from coapthon.messages.request import Request
 from coapthon.messages.response import Response
-from coapthon.serializer import Serializer
-import time
 
 __author__ = 'Emilio Vallati'
 __version__ = "1.0"
@@ -459,7 +458,6 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.etag = str(1)
-        expected.location_path = "etag"
 
         exchange3 = (req3, expected)
 

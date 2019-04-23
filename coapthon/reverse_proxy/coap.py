@@ -4,7 +4,6 @@ import socket
 import struct
 import threading
 import xml.etree.ElementTree as ElementTree
-
 import os
 import re
 
@@ -173,7 +172,8 @@ class CoAP(object):
         host, port = response.source
 
         if response.code == defines.Codes.CONTENT.number:
-            resource = Resource('server', self, visible=True, observable=False, allow_children=True)
+            resource = RemoteResource('server', (host, port), "/",
+                                      coap_server=self, visible=True, observable=False, allow_children=True)
             self.add_resource(name, resource)
             self._mapping[name] = (host, port)
             self.parse_core_link_format(response.payload, name, (host, port))
@@ -209,8 +209,8 @@ class CoAP(object):
                         dict_att[a[0]] = a[0]
                 link_format = link_format[result.end(0) + 1:]
             # TODO handle observing
-            resource = RemoteResource('server', remote_server, path, coap_server=self, visible=True, observable=False,
-                                      allow_children=True)
+            resource = RemoteResource('server', remote_server, path,
+                                      coap_server=self, visible=True, observable=False, allow_children=True)
             resource.attributes = dict_att
             self.add_resource(base_path + "/" + path, resource)
 

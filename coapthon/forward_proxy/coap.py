@@ -4,8 +4,6 @@ import socket
 import struct
 import threading
 
-import os
-
 from coapthon import defines
 from coapthon.layers.blocklayer import BlockLayer
 from coapthon.layers.cachelayer import CacheLayer

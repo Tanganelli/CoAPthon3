@@ -1,8 +1,11 @@
+# -*- coding: utf-8 -*-
+
 from queue import Queue
 import random
 import socket
 import threading
 import unittest
+
 from coapclient import HelperClient
 from coapforwardproxy import CoAPForwardProxy
 from coapserver import CoAPServer
@@ -159,14 +162,13 @@ class Tests(unittest.TestCase):
 
     def test_get_forward(self):
         print("TEST_GET_FORWARD")
-        path = "/basic"
+
         req = Request()
         req.code = defines.Codes.GET.number
-        req.uri_path = path
+        req.proxy_uri = "coap://127.0.0.1:5684/basic"
         req.type = defines.Types["CON"]
         req._mid = self.current_mid
         req.destination = self.server_address
-        req.proxy_uri = "coap://127.0.0.1:5684/basic"
 
         expected = Response()
         expected.type = defines.Types["ACK"]
@@ -176,93 +178,88 @@ class Tests(unittest.TestCase):
         expected.payload = "Basic Resource"
 
         exchange1 = (req, expected)
-
         self.current_mid += 1
 
         self._test_with_client([exchange1])
 
-    # def test_separate(self):
-    #     print "TEST_SEPARATE"
-    #     path = "/separate"
-    #     req = Request()
-    #     req.code = defines.Codes.GET.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["CON"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.CONTENT.number
-    #     expected.token = None
-    #     expected.max_age = 60
-    #
-    #     exchange1 = (req, expected)
-    #
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.POST.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     req.payload = "POST"
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["CON"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.CREATED.number
-    #     expected.token = None
-    #     expected.options = None
-    #
-    #     exchange2 = (req, expected)
-    #
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.PUT.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     req.payload = "PUT"
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["CON"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.CHANGED.number
-    #     expected.token = None
-    #     expected.options = None
-    #
-    #     exchange3 = (req, expected)
-    #
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.DELETE.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["CON"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.DELETED.number
-    #     expected.token = None
-    #
-    #     exchange4 = (req, expected)
-    #
-    #     self.current_mid += 1
-    #     self._test_with_client([exchange1, exchange2, exchange3, exchange4])
-    #
+    def test_separate(self):
+        print("TEST_SEPARATE")
+
+        req = Request()
+        req.code = defines.Codes.GET.number
+        req.proxy_uri = "coap://127.0.0.1:5684/separate"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+
+        expected = Response()
+        expected.type = defines.Types["CON"]
+        expected._mid = None
+        expected.code = defines.Codes.CONTENT.number
+        expected.token = None
+        expected.max_age = 60
+
+        exchange1 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.POST.number
+        req.proxy_uri = "coap://127.0.0.1:5684/separate"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        req.payload = "POST"
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.CHANGED.number
+        expected.token = None
+        expected.options = None
+
+        exchange2 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.PUT.number
+        req.proxy_uri = "coap://127.0.0.1:5684/separate"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        req.payload = "PUT"
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.CHANGED.number
+        expected.token = None
+        expected.options = None
+
+        exchange3 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.DELETE.number
+        req.proxy_uri = "coap://127.0.0.1:5684/separate"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.DELETED.number
+        expected.token = None
+
+        exchange4 = (req, expected)
+        self.current_mid += 1
+
+        self._test_with_client([exchange1, exchange2, exchange3, exchange4])
+
     def test_post(self):
         print("TEST_POST")
-        path = "/storage/new_res?id=1"
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.POST.number
         req.type = defines.Types["CON"]
         req._mid = self.current_mid
@@ -358,8 +355,8 @@ class Tests(unittest.TestCase):
 
     def test_post_block(self):
         print("TEST_POST_BLOCK")
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.POST.number
         req.proxy_uri = "coap://127.0.0.1:5684/storage/new_res"
         req.type = defines.Types["CON"]
@@ -665,8 +662,8 @@ class Tests(unittest.TestCase):
 
     def test_post_block_big(self):
         print("TEST_POST_BLOCK_BIG")
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.POST.number
         req.proxy_uri = "coap://127.0.0.1:5684/big"
         req.type = defines.Types["CON"]
@@ -820,501 +817,495 @@ class Tests(unittest.TestCase):
         expected.code = defines.Codes.CHANGED.number
         expected.token = None
         expected.payload = None
-        expected.location_path = "big"
 
         exchange7 = (req, expected)
         self.current_mid += 1
 
         self._test_plugtest([exchange1, exchange2, exchange3, exchange4, exchange5, exchange6, exchange7])
 
-    # def test_options(self):
-    #     print "TEST_OPTIONS"
-    #     path = "/storage/new_res"
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.POST.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     option = Option()
-    #     option.number = defines.OptionRegistry.ETAG.number
-    #     option.value = "test"
-    #     req.add_option(option)
-    #     req.del_option(option)
-    #     req.payload = "test"
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.CREATED.number
-    #     expected.token = None
-    #     expected.payload = None
-    #     expected.location_path = "storage/new_res"
-    #
-    #     exchange1 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.POST.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     option = Option()
-    #     option.number = defines.OptionRegistry.ETAG.number
-    #     option.value = "test"
-    #     req.add_option(option)
-    #     req.del_option_by_name("ETag")
-    #     req.payload = "test"
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.CREATED.number
-    #     expected.token = None
-    #     expected.payload = None
-    #     expected.location_path = "storage/new_res"
-    #
-    #     exchange2 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.POST.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     option = Option()
-    #     option.number = defines.OptionRegistry.ETAG.number
-    #     option.value = "test"
-    #     req.add_option(option)
-    #     del req.etag
-    #     req.payload = "test"
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.CREATED.number
-    #     expected.token = None
-    #     expected.payload = None
-    #     expected.location_path = "storage/new_res"
-    #
-    #     exchange3 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     self._test_with_client([exchange1, exchange2, exchange3])
-    #
-    # def test_content_type(self):
-    #     print "TEST_CONTENT_TYPE"
-    #     path = "/storage/new_res"
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.POST.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     req.payload = "<value>test</value>"
-    #     req.content_type = defines.Content_types["application/xml"]
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.CREATED.number
-    #     expected.token = None
-    #     expected.payload = None
-    #     expected.location_path = "storage/new_res"
-    #
-    #     exchange1 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.GET.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.CONTENT.number
-    #     expected.token = None
-    #     expected.payload = "Basic Resource"
-    #
-    #     exchange2 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.PUT.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     req.payload = "test"
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.CHANGED.number
-    #     expected.token = None
-    #     expected.payload = None
-    #
-    #     exchange3 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.GET.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.CONTENT.number
-    #     expected.token = None
-    #     expected.payload = "test"
-    #
-    #     exchange4 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.GET.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     req.accept = defines.Content_types["application/xml"]
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.CONTENT.number
-    #     expected.token = None
-    #     expected.payload = "<value>test</value>"
-    #
-    #     exchange5 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.GET.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     req.accept = defines.Content_types["application/json"]
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.NOT_ACCEPTABLE.number
-    #     expected.token = None
-    #     expected.payload = None
-    #     expected.content_type = defines.Content_types["application/json"]
-    #
-    #     exchange6 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.GET.number
-    #     req.uri_path = "/xml"
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.CONTENT.number
-    #     expected.token = None
-    #     expected.payload = "<value>0</value>"
-    #     expected.content_type = defines.Content_types["application/xml"]
-    #
-    #     print(expected.pretty_print())
-    #
-    #     exchange7 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     self._test_with_client([exchange1, exchange2, exchange3, exchange4, exchange5, exchange6, exchange7])
-    #
-    # def test_ETAG(self):
-    #     print "TEST_ETAG"
-    #     path = "/etag"
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.GET.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.CONTENT.number
-    #     expected.token = None
-    #     expected.payload = "ETag resource"
-    #     expected.etag = "0"
-    #
-    #     exchange1 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.POST.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     req.payload = "test"
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.CREATED.number
-    #     expected.token = None
-    #     expected.payload = None
-    #     expected.location_path = path
-    #     expected.etag = "1"
-    #
-    #     exchange2 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.GET.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     req.etag = "1"
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.VALID.number
-    #     expected.token = None
-    #     expected.payload = "test"
-    #     expected.etag = "1"
-    #
-    #     exchange3 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     self._test_with_client([exchange1, exchange2, exchange3])
-    #
-    # def test_child(self):
-    #     print "TEST_CHILD"
-    #     path = "/child"
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.POST.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     req.payload = "test"
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.CREATED.number
-    #     expected.token = None
-    #     expected.payload = None
-    #     expected.location_path = path
-    #
-    #     exchange1 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.GET.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.CONTENT.number
-    #     expected.token = None
-    #     expected.payload = "test"
-    #
-    #     exchange2 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.PUT.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     req.payload = "testPUT"
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.CHANGED.number
-    #     expected.token = None
-    #     expected.payload = None
-    #
-    #     exchange3 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.DELETE.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.DELETED.number
-    #     expected.token = None
-    #     expected.payload = None
-    #
-    #     exchange4 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     self._test_with_client([exchange1, exchange2, exchange3, exchange4])
-    #
-    # def test_not_found(self):
-    #     print "TEST_not_found"
-    #     path = "/not_found"
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.GET.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     req.token = 100
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.NOT_FOUND.number
-    #     expected.token = "100"
-    #     expected.payload = None
-    #
-    #     exchange1 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.POST.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     req.payload = "test"
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.METHOD_NOT_ALLOWED.number
-    #     expected.token = None
-    #
-    #     exchange2 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.PUT.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     req.payload = "testPUT"
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.NOT_FOUND.number
-    #     expected.token = None
-    #     expected.payload = None
-    #
-    #     exchange3 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.DELETE.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = self.current_mid
-    #     expected.code = defines.Codes.NOT_FOUND.number
-    #     expected.token = None
-    #     expected.payload = None
-    #
-    #     exchange4 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     self._test_with_client([exchange1, exchange2, exchange3, exchange4])
-    #
-    # def test_invalid(self):
-    #     print("TEST_INVALID")
-    #
-    #     # version
-    #     req = (bytes("\x00\x01\x8c\xda", "utf-8"), self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange1 = (req, expected)
-    #
-    #     # version
-    #     req = (bytes("\x40", "utf-8"), self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange2 = (req, expected)
-    #
-    #     # code
-    #     req = (bytes("\x40\x05\x8c\xda", "utf-8"), self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange3 = (req, expected)
-    #
-    #     # option
-    #     req = (bytes("\x40\x01\x8c\xda\x94", "utf-8"), self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange4 = (req, expected)
-    #
-    #     # payload marker
-    #     req = (bytes("\x40\x02\x8c\xda\x75\x62\x61\x73\x69\x63\xff", "utf-8"), self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange5 = (req, expected)
-    #
-    #     self._test_datagram([exchange1, exchange2, exchange3, exchange4, exchange5])
+    def test_options(self):
+        print("TEST_OPTIONS")
+        path = "/storage/new_res"
+
+        req = Request()
+        req.code = defines.Codes.POST.number
+        req.proxy_uri = "coap://127.0.0.1:5684/storage/new_res"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        option = Option()
+        option.number = defines.OptionRegistry.ETAG.number
+        option.value = "test"
+        req.add_option(option)
+        req.del_option(option)
+        req.payload = "test"
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.CREATED.number
+        expected.token = None
+        expected.payload = None
+        expected.location_path = "storage/new_res"
+
+        exchange1 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.POST.number
+        req.proxy_uri = "coap://127.0.0.1:5684/storage/new_res"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        option = Option()
+        option.number = defines.OptionRegistry.ETAG.number
+        option.value = "test"
+        req.add_option(option)
+        req.del_option_by_name("ETag")
+        req.payload = "test"
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.CREATED.number
+        expected.token = None
+        expected.payload = None
+        expected.location_path = "storage/new_res"
+
+        exchange2 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.POST.number
+        req.proxy_uri = "coap://127.0.0.1:5684/storage/new_res"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        option = Option()
+        option.number = defines.OptionRegistry.ETAG.number
+        option.value = "test"
+        req.add_option(option)
+        del req.etag
+        req.payload = "test"
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.CREATED.number
+        expected.token = None
+        expected.payload = None
+        expected.location_path = "storage/new_res"
+
+        exchange3 = (req, expected)
+        self.current_mid += 1
+
+        self._test_with_client([exchange1, exchange2, exchange3])
+
+    def test_content_type(self):
+        print("TEST_CONTENT_TYPE")
+
+        req = Request()
+        req.code = defines.Codes.POST.number
+        req.proxy_uri = "coap://127.0.0.1:5684/storage/new_res"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        req.payload = "<value>test</value>"
+        req.content_type = defines.Content_types["application/xml"]
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.CREATED.number
+        expected.token = None
+        expected.payload = None
+        expected.location_path = "storage/new_res"
+
+        exchange1 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.GET.number
+        req.proxy_uri = "coap://127.0.0.1:5684/storage/new_res"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.CONTENT.number
+        expected.token = None
+        expected.payload = "Basic Resource"
+
+        exchange2 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.PUT.number
+        req.proxy_uri = "coap://127.0.0.1:5684/storage/new_res"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        req.payload = "test"
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.CHANGED.number
+        expected.token = None
+        expected.payload = None
+
+        exchange3 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.GET.number
+        req.proxy_uri = "coap://127.0.0.1:5684/storage/new_res"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.CONTENT.number
+        expected.token = None
+        expected.payload = "test"
+
+        exchange4 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.GET.number
+        req.proxy_uri = "coap://127.0.0.1:5684/storage/new_res"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        req.accept = defines.Content_types["application/xml"]
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.CONTENT.number
+        expected.token = None
+        expected.payload = "<value>test</value>"
+
+        exchange5 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.GET.number
+        req.proxy_uri = "coap://127.0.0.1:5684/storage/new_res"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        req.accept = defines.Content_types["application/json"]
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.NOT_ACCEPTABLE.number
+        expected.token = None
+        expected.payload = None
+        # expected.content_type = defines.Content_types["application/json"]
+
+        exchange6 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.GET.number
+        req.proxy_uri = "coap://127.0.0.1:5684/xml"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.CONTENT.number
+        expected.token = None
+        expected.payload = "<value>0</value>"
+        expected.content_type = defines.Content_types["application/xml"]
+
+        print(expected.pretty_print())
+
+        exchange7 = (req, expected)
+        self.current_mid += 1
+
+        self._test_with_client([exchange1, exchange2, exchange3, exchange4, exchange5, exchange6, exchange7])
+
+    def test_ETAG(self):
+        print("TEST_ETAG")
+
+        req = Request()
+        req.code = defines.Codes.GET.number
+        req.proxy_uri = "coap://127.0.0.1:5684/etag"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.CONTENT.number
+        expected.token = None
+        expected.payload = "ETag resource"
+        expected.etag = "0"
+
+        exchange1 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.POST.number
+        req.proxy_uri = "coap://127.0.0.1:5684/etag"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        req.payload = "test"
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.CHANGED.number
+        expected.token = None
+        expected.payload = None
+        expected.etag = "1"
+
+        exchange2 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.GET.number
+        req.proxy_uri = "coap://127.0.0.1:5684/etag"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        req.etag = "1"
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.VALID.number
+        expected.token = None
+        expected.payload = None
+        expected.etag = "1"
+
+        exchange3 = (req, expected)
+        self.current_mid += 1
+
+        self._test_with_client([exchange1, exchange2, exchange3])
+
+    def test_child(self):
+        print("TEST_CHILD")
+
+        req = Request()
+        req.code = defines.Codes.POST.number
+        req.proxy_uri = "coap://127.0.0.1:5684/child"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        req.payload = "test"
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.CREATED.number
+        expected.token = None
+        expected.payload = None
+        expected.location_path = "child"
+
+        exchange1 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.GET.number
+        req.proxy_uri = "coap://127.0.0.1:5684/child"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.CONTENT.number
+        expected.token = None
+        expected.payload = "test"
+
+        exchange2 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.PUT.number
+        req.proxy_uri = "coap://127.0.0.1:5684/child"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        req.payload = "testPUT"
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.CHANGED.number
+        expected.token = None
+        expected.payload = None
+
+        exchange3 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.DELETE.number
+        req.proxy_uri = "coap://127.0.0.1:5684/child"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.DELETED.number
+        expected.token = None
+        expected.payload = None
+
+        exchange4 = (req, expected)
+        self.current_mid += 1
+
+        self._test_with_client([exchange1, exchange2, exchange3, exchange4])
+
+    def test_not_found(self):
+        print("TEST_not_found")
+
+        req = Request()
+        req.code = defines.Codes.GET.number
+        req.proxy_uri = "coap://127.0.0.1:5684/not_found"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        req.token = 100
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.NOT_FOUND.number
+        expected.token = 100
+        expected.payload = None
+
+        exchange1 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.POST.number
+        req.proxy_uri = "coap://127.0.0.1:5684/not_found"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        req.payload = "testPOST"
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.METHOD_NOT_ALLOWED.number
+        expected.token = None
+
+        exchange2 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.PUT.number
+        req.proxy_uri = "coap://127.0.0.1:5684/not_found"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        req.payload = "testPUT"
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.NOT_FOUND.number
+        expected.token = None
+        expected.payload = None
+
+        exchange3 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.DELETE.number
+        req.proxy_uri = "coap://127.0.0.1:5684/not_found"
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = self.current_mid
+        expected.code = defines.Codes.NOT_FOUND.number
+        expected.token = None
+        expected.payload = None
+
+        exchange4 = (req, expected)
+        self.current_mid += 1
+
+        self._test_with_client([exchange1, exchange2, exchange3, exchange4])
+
+    def test_invalid(self):
+        print("TEST_INVALID")
+
+        # version
+        req = (b'\x00\x01\x8c\xda', self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange1 = (req, expected)
+
+        # version
+        req = (b'\x40', self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange2 = (req, expected)
+
+        # code
+        req = (b'\x40\x05\x8c\xda', self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange3 = (req, expected)
+
+        # option
+        req = (b'\x40\x01\x8c\xda\x94', self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange4 = (req, expected)
+
+        # payload marker
+        req = (b'\x40\x02\x8c\xda\x75\x62\x61\x73\x69\x63\xff', self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange5 = (req, expected)
+
+        self._test_datagram([exchange1, exchange2, exchange3, exchange4, exchange5])
 
     def test_post_block_big_client(self):
         print("TEST_POST_BLOCK_BIG_CLIENT")
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.POST.number
         req.proxy_uri = "coap://127.0.0.1:5684/big"
         req.type = defines.Types["CON"]
@@ -1375,13 +1366,13 @@ class Tests(unittest.TestCase):
         expected.payload = None
 
         exchange1 = (req, expected)
-
         self.current_mid += 1
 
         self._test_with_client_observe([exchange1])
 
     def test_duplicate(self):
         print("TEST_DUPLICATE")
+
         req = Request()
         req.code = defines.Codes.GET.number
         req.proxy_uri = "coap://127.0.0.1:5684/basic"
@@ -1396,10 +1387,12 @@ class Tests(unittest.TestCase):
         expected.token = None
 
         self.current_mid += 1
+
         self._test_plugtest([(req, expected), (req, expected)])
 
     def test_duplicate_not_completed(self):
         print("TEST_DUPLICATE_NOT_COMPLETED")
+
         req = Request()
         req.code = defines.Codes.GET.number
         req.proxy_uri = "coap://127.0.0.1:5684/long"
@@ -1420,8 +1413,9 @@ class Tests(unittest.TestCase):
         expected2.token = None
 
         self.current_mid += 1
+
         self._test_plugtest([(req, None), (req, expected), (None, expected2)])
+
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -1,11 +1,13 @@
+# -*- coding: utf-8 -*-
+
 from queue import Queue
 import random
 import threading
 import unittest
+
 from coapclient import HelperClient
 from coapserver import CoAPServer
 from coapthon import defines
-from coapthon.messages.message import Message
 from coapthon.messages.option import Option
 from coapthon.messages.request import Request
 from coapthon.messages.response import Response
@@ -90,6 +92,7 @@ class Tests(unittest.TestCase):
     def test_not_allowed(self):
         print("TEST_NOT_ALLOWED")
         path = "/void"
+
         req = Request()
         req.code = defines.Codes.GET.number
         req.uri_path = path
@@ -104,7 +107,6 @@ class Tests(unittest.TestCase):
         expected.token = None
 
         exchange1 = (req, expected)
-
         self.current_mid += 1
 
         req = Request()
@@ -121,7 +123,6 @@ class Tests(unittest.TestCase):
         expected.token = None
 
         exchange2 = (req, expected)
-
         self.current_mid += 1
 
         req = Request()
@@ -138,7 +139,6 @@ class Tests(unittest.TestCase):
         expected.token = None
 
         exchange3 = (req, expected)
-
         self.current_mid += 1
 
         req = Request()
@@ -155,11 +155,10 @@ class Tests(unittest.TestCase):
         expected.token = None
 
         exchange4 = (req, expected)
-
         self.current_mid += 1
+
         self._test_with_client([exchange1, exchange2, exchange3, exchange4])
 
 
 if __name__ == '__main__':
     unittest.main()
-

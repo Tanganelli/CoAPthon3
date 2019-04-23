@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
+
 import collections
-import array
 import struct
 
 __author__ = 'Giacomo Tanganelli'
@@ -167,7 +168,7 @@ class OptionRegistry(object):
         :return: option flags
         :rtype: 3-tuple (critical, unsafe, no-cache)
         """
-        opt_bytes = array.array('B', '\0\0')
+        opt_bytes = bytearray(2)
         if option_num < 256:
             s = struct.Struct("!B")
             s.pack_into(opt_bytes, 0, option_num)
