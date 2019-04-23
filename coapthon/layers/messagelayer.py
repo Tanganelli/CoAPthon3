@@ -1,6 +1,7 @@
 import logging
 import random
 import time
+import socket
 from coapthon.messages.message import Message
 from coapthon import defines
 from coapthon.messages.request import Request
@@ -105,10 +106,11 @@ class MessageLayer(object):
             host, port = response.source
         except AttributeError:
             return
+        all_coap_nodes = defines.ALL_COAP_NODES_IPV6 if socket.getaddrinfo(host, None)[0][0] == socket.AF_INET6 else defines.ALL_COAP_NODES
         key_mid = str_append_hash(host, port, response.mid)
-        key_mid_multicast = str_append_hash(defines.ALL_COAP_NODES, port, response.mid)
+        key_mid_multicast = str_append_hash(all_coap_nodes, port, response.mid)
         key_token = str_append_hash(host, port, response.token)
-        key_token_multicast = str_append_hash(defines.ALL_COAP_NODES, port, response.token)
+        key_token_multicast = str_append_hash(all_coap_nodes, port, response.token)
         if key_mid in list(self._transactions.keys()):
             transaction = self._transactions[key_mid]
             if response.token != transaction.request.token:
@@ -151,10 +153,11 @@ class MessageLayer(object):
             host, port = message.source
         except AttributeError:
             return
+        all_coap_nodes = defines.ALL_COAP_NODES_IPV6 if socket.getaddrinfo(host, None)[0][0] == socket.AF_INET6 else defines.ALL_COAP_NODES
         key_mid = str_append_hash(host, port, message.mid)
-        key_mid_multicast = str_append_hash(defines.ALL_COAP_NODES, port, message.mid)
+        key_mid_multicast = str_append_hash(all_coap_nodes, port, message.mid)
         key_token = str_append_hash(host, port, message.token)
-        key_token_multicast = str_append_hash(defines.ALL_COAP_NODES, port, message.token)
+        key_token_multicast = str_append_hash(all_coap_nodes, port, message.token)
         if key_mid in list(self._transactions.keys()):
             transaction = self._transactions[key_mid]
         elif key_token in self._transactions_token:
