@@ -51,10 +51,7 @@ class Serializer(object):
             message.type = message_type
             message.mid = mid
             if token_length > 0:
-                fmt = "%ss" % token_length
-                s = struct.Struct(fmt)
-                token_value = s.unpack_from(datagram[pos:])[0]
-                message.token = token_value.decode("utf-8")
+                message.token = datagram[pos:pos+token_length]
             else:
                 message.token = None
 
@@ -144,7 +141,7 @@ class Serializer(object):
         """
         fmt = "!BBH"
 
-        if message.token is None or message.token == "":
+        if message.token is None:
             tkl = 0
         else:
             tkl = len(message.token)
@@ -157,9 +154,9 @@ class Serializer(object):
 
         if message.token is not None and tkl > 0:
 
-            for b in str(message.token):
-                fmt += "c"
-                values.append(bytes(b, "utf-8"))
+            for b in message.token:
+                fmt += "B"
+                values.append(b)
 
         options = Serializer.as_sorted_list(message.options)  # already sorted
         lastoptionnumber = 0

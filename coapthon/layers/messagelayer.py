@@ -2,6 +2,8 @@ import logging
 import random
 import time
 import socket
+
+from coapthon import utils
 from coapthon.messages.message import Message
 from coapthon import defines
 from coapthon.messages.request import Request
@@ -10,15 +12,6 @@ from coapthon.transaction import Transaction
 __author__ = 'Giacomo Tanganelli'
 
 logger = logging.getLogger(__name__)
-
-
-def str_append_hash(*args):
-    """ Convert each argument to a lower case string, appended, then hash """
-    ret_hash = ""
-    for i in args:
-        ret_hash += str(i).lower()
-
-    return hash(ret_hash)
 
 
 class MessageLayer(object):
@@ -77,8 +70,8 @@ class MessageLayer(object):
             host, port = request.source
         except AttributeError:
             return
-        key_mid = str_append_hash(host, port, request.mid)
-        key_token = str_append_hash(host, port, request.token)
+        key_mid = utils.str_append_hash(host, port, request.mid)
+        key_token = utils.str_append_hash(host, port, request.token)
 
         if key_mid in list(self._transactions.keys()):
             # Duplicated
@@ -107,10 +100,10 @@ class MessageLayer(object):
         except AttributeError:
             return
         all_coap_nodes = defines.ALL_COAP_NODES_IPV6 if socket.getaddrinfo(host, None)[0][0] == socket.AF_INET6 else defines.ALL_COAP_NODES
-        key_mid = str_append_hash(host, port, response.mid)
-        key_mid_multicast = str_append_hash(all_coap_nodes, port, response.mid)
-        key_token = str_append_hash(host, port, response.token)
-        key_token_multicast = str_append_hash(all_coap_nodes, port, response.token)
+        key_mid = utils.str_append_hash(host, port, response.mid)
+        key_mid_multicast = utils.str_append_hash(all_coap_nodes, port, response.mid)
+        key_token = utils.str_append_hash(host, port, response.token)
+        key_token_multicast = utils.str_append_hash(all_coap_nodes, port, response.token)
         if key_mid in list(self._transactions.keys()):
             transaction = self._transactions[key_mid]
             if response.token != transaction.request.token:
@@ -154,10 +147,10 @@ class MessageLayer(object):
         except AttributeError:
             return
         all_coap_nodes = defines.ALL_COAP_NODES_IPV6 if socket.getaddrinfo(host, None)[0][0] == socket.AF_INET6 else defines.ALL_COAP_NODES
-        key_mid = str_append_hash(host, port, message.mid)
-        key_mid_multicast = str_append_hash(all_coap_nodes, port, message.mid)
-        key_token = str_append_hash(host, port, message.token)
-        key_token_multicast = str_append_hash(all_coap_nodes, port, message.token)
+        key_mid = utils.str_append_hash(host, port, message.mid)
+        key_mid_multicast = utils.str_append_hash(all_coap_nodes, port, message.mid)
+        key_token = utils.str_append_hash(host, port, message.token)
+        key_token_multicast = utils.str_append_hash(all_coap_nodes, port, message.token)
         if key_mid in list(self._transactions.keys()):
             transaction = self._transactions[key_mid]
         elif key_token in self._transactions_token:
@@ -216,10 +209,10 @@ class MessageLayer(object):
         if transaction.request.mid is None:
             transaction.request.mid = self.fetch_mid()
 
-        key_mid = str_append_hash(host, port, request.mid)
+        key_mid = utils.str_append_hash(host, port, request.mid)
         self._transactions[key_mid] = transaction
 
-        key_token = str_append_hash(host, port, request.token)
+        key_token = utils.str_append_hash(host, port, request.token)
         self._transactions_token[key_token] = transaction
 
         return self._transactions[key_mid]
@@ -252,7 +245,7 @@ class MessageLayer(object):
                 host, port = transaction.response.destination
             except AttributeError:
                 return
-            key_mid = str_append_hash(host, port, transaction.response.mid)
+            key_mid = utils.str_append_hash(host, port, transaction.response.mid)
             self._transactions[key_mid] = transaction
 
         transaction.request.acknowledged = True
@@ -274,8 +267,8 @@ class MessageLayer(object):
                 host, port = message.destination
             except AttributeError:
                 return
-            key_mid = str_append_hash(host, port, message.mid)
-            key_token = str_append_hash(host, port, message.token)
+            key_mid = utils.str_append_hash(host, port, message.mid)
+            key_token = utils.str_append_hash(host, port, message.token)
             if key_mid in self._transactions:
                 transaction = self._transactions[key_mid]
                 related = transaction.response

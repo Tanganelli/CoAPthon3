@@ -1,5 +1,7 @@
 import logging
+
 from coapthon import defines
+from coapthon import utils
 from coapthon.messages.request import Request
 from coapthon.messages.response import Response
 
@@ -49,7 +51,7 @@ class BlockLayer(object):
         """
         if transaction.request.block2 is not None:
             host, port = transaction.request.source
-            key_token = hash(str(host) + str(port) + str(transaction.request.token))
+            key_token = utils.str_append_hash(host, port, transaction.request.token)
             num, m, size = transaction.request.block2
             if key_token in self._block2_receive:
                 self._block2_receive[key_token].num = num
@@ -65,7 +67,7 @@ class BlockLayer(object):
         elif transaction.request.block1 is not None:
             # POST or PUT
             host, port = transaction.request.source
-            key_token = hash(str(host) + str(port) + str(transaction.request.token))
+            key_token = utils.str_append_hash(host, port, transaction.request.token)
             num, m, size = transaction.request.block1
             if transaction.request.size1 is not None:
                 # What to do if the size1 is larger than the maximum resource size or the maxium server buffer
@@ -122,7 +124,7 @@ class BlockLayer(object):
         :return: the edited transaction
         """
         host, port = transaction.response.source
-        key_token = hash(str(host) + str(port) + str(transaction.response.token))
+        key_token = utils.str_append_hash(host, port, transaction.response.token)
         if key_token in self._block1_sent and transaction.response.block1 is not None:
             item = self._block1_sent[key_token]
             transaction.block_transfer = True
@@ -214,7 +216,7 @@ class BlockLayer(object):
         :return: the edited transaction
         """
         host, port = transaction.request.source
-        key_token = hash(str(host) + str(port) + str(transaction.request.token))
+        key_token = utils.str_append_hash(host, port, transaction.request.token)
         if (key_token in self._block2_receive and transaction.response.payload is not None) or \
                 (transaction.response.payload is not None and len(transaction.response.payload) > defines.MAX_PAYLOAD):
             if key_token in self._block2_receive:
@@ -260,7 +262,7 @@ class BlockLayer(object):
         assert isinstance(request, Request)
         if request.block1 or (request.payload is not None and len(request.payload) > defines.MAX_PAYLOAD):
             host, port = request.destination
-            key_token = hash(str(host) + str(port) + str(request.token))
+            key_token = utils.str_append_hash(host, port, request.token)
             if request.block1:
                 num, m, size = request.block1
             else:
@@ -277,7 +279,7 @@ class BlockLayer(object):
             request.block1 = (num, m, size)
         elif request.block2:
             host, port = request.destination
-            key_token = hash(str(host) + str(port) + str(request.token))
+            key_token = utils.str_append_hash(host, port, request.token)
             num, m, size = request.block2
             item = BlockItem(size, num, m, size, "", None)
             self._block2_sent[key_token] = item

@@ -1,3 +1,5 @@
+import os
+import logging.config
 from queue import Queue
 import random
 import socket
@@ -6,6 +8,7 @@ import unittest
 from coapclient import HelperClient
 from coapserver import CoAPServer
 from coapthon import defines
+from coapthon.utils import create_logging
 from coapthon.messages.message import Message
 from coapthon.messages.option import Option
 from coapthon.messages.request import Request
@@ -56,6 +59,10 @@ PAYLOAD = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr,  sed diam no
           "consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam " \
           "erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd " \
           "gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
+
+if not os.path.isfile("logging.conf"):
+    create_logging()
+logging.config.fileConfig("logging.conf", disable_existing_loggers=False)
 
 
 class Tests(unittest.TestCase):
@@ -1397,7 +1404,7 @@ class Tests(unittest.TestCase):
         expected.type = defines.Types["ACK"]
         expected._mid = self.current_mid
         expected.code = defines.Codes.NOT_FOUND.number
-        expected.token = "100"
+        expected.token = 100
         expected.payload = None
 
         exchange1 = (req, expected)
