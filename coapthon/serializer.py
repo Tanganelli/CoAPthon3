@@ -113,13 +113,17 @@ class Serializer(object):
                         raise AttributeError("Packet length %s, pos %s" % (length_packet, pos))
                     message.payload = ""
                     payload = values[pos:]
-                    try:
-                        if message.payload_type == defines.Content_types["application/octet-stream"]:
-                            message.payload = payload
-                        else:
+                    if hasattr(message, 'payload_type') and message.payload_type in [
+                        defines.Content_types["application/octet-stream"],
+                        defines.Content_types["application/exi"],
+                        defines.Content_types["application/cbor"]
+                    ]:
+                        message.payload = payload
+                    else:
+                        try:
                             message.payload = payload.decode("utf-8")
-                    except AttributeError:
-                        message.payload = payload.decode("utf-8")
+                        except AttributeError:
+                            message.payload = payload
                     pos += len(payload)
 
             return message
@@ -323,7 +327,7 @@ class Serializer(object):
     @staticmethod
     def convert_to_raw(number, value, length):
         """
-        Get the value of an option as a ByteArray.
+        Get the value of an option as bytes.
 
         :param number: the option number
         :param value: the option value
@@ -350,11 +354,11 @@ class Serializer(object):
         if isinstance(value, str):
             value = str(value)
         if isinstance(value, str):
-            return bytearray(value, "utf-8")
+            return bytes(value, "utf-8")
         elif isinstance(value, int):
             return value
         else:
-            return bytearray(value)
+            return bytes(value)
 
     @staticmethod
     def as_sorted_list(options):

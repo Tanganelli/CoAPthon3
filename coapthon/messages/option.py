@@ -42,7 +42,7 @@ class Option(object):
         :return: the option value in the correct format depending on the option
         """
         if type(self._value) is None:
-            self._value = bytearray()
+            self._value = bytes()
         opt_type = defines.OptionRegistry.LIST[self._number].value_type
         if opt_type == defines.INTEGER:
             if byte_len(self._value) > 0:
