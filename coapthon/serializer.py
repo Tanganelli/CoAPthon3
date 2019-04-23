@@ -70,6 +70,7 @@ class Serializer(object):
                     # the first 4 bits of the byte represent the option delta
                     # delta = self._reader.read(4).uint
                     num, option_length, pos = Serializer.read_option_value_len_from_byte(next_byte, pos, values)
+                    logger.debug("option value (delta): %d len: %d", num, option_length)
                     current_option += num
                     # read option
                     try:
@@ -81,8 +82,7 @@ class Serializer(object):
                         else:
                             # If the non-critical option is unknown
                             # (vendor-specific, proprietary) - just skip it
-                            #log.err("unrecognized option %d" % current_option)
-                            pass
+                            logger.warning("unrecognized option %d", current_option)
                     else:
                         if option_length == 0:
                             value = None
@@ -313,6 +313,7 @@ class Serializer(object):
             length = struct.unpack("!B", values[pos].to_bytes(1, "big"))[0] + 13
             pos += 1
         elif l_nibble == 14:
+            s = struct.Struct("!H")
             length = s.unpack_from(values[pos:].to_bytes(2, "big"))[0] + 269
             pos += 2
         else:

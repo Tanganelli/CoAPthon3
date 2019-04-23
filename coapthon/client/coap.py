@@ -148,7 +148,7 @@ class CoAP(object):
         :param message: the message to send
         """
         host, port = message.destination
-        logger.debug("send_datagram - " + str(message))
+        logger.info("send_datagram - " + str(message))
         serializer = Serializer()
         raw_message = serializer.serialize(message)
 
@@ -263,7 +263,7 @@ class CoAP(object):
             message = serializer.deserialize(datagram, source)
 
             if isinstance(message, Response):
-                logger.debug("receive_datagram - " + str(message))
+                logger.info("receive_datagram - " + str(message))
                 transaction, send_ack = self._messageLayer.receive_response(message)
                 if transaction is None:  # pragma: no cover
                     continue

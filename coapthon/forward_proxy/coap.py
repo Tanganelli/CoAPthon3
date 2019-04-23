@@ -139,7 +139,7 @@ class CoAP(object):
             except socket.timeout:
                 continue
             try:
-                #Start a new thread not to block other requests
+                # Start a new thread not to block other requests
                 args = ((data, client_address), )
                 t = threading.Thread(target=self.receive_datagram, args=args)
                 t.daemon = True
@@ -188,20 +188,20 @@ class CoAP(object):
             rst.code = message
             self.send_datagram(rst)
             return
-        logger.debug("receive_datagram - " + str(message))
+        logger.info("receive_datagram - " + str(message))
         if isinstance(message, Request):
 
             transaction = self._messageLayer.receive_request(message)
 
             if transaction.request.duplicated and transaction.completed:
-                logger.debug("message duplicated,transaction completed")
+                logger.debug("message duplicated, transaction completed")
                 transaction = self._observeLayer.send_response(transaction)
                 transaction = self._blockLayer.send_response(transaction)
                 transaction = self._messageLayer.send_response(transaction)
                 self.send_datagram(transaction.response)
                 return
             elif transaction.request.duplicated and not transaction.completed:
-                logger.debug("message duplicated,transaction NOT completed")
+                logger.debug("message duplicated, transaction NOT completed")
                 self._send_ack(transaction)
                 return
 
@@ -268,7 +268,7 @@ class CoAP(object):
         """
         if not self.stopped.isSet():
             host, port = message.destination
-            logger.debug("send_datagram - " + str(message))
+            logger.info("send_datagram - " + str(message))
             serializer = Serializer()
 
             message = serializer.serialize(message)

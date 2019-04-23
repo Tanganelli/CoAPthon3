@@ -273,7 +273,8 @@ class CoAP(object):
             rst.code = message
             self.send_datagram(rst)
             return
-        logger.debug("receive_datagram - " + str(message))
+
+        logger.info("receive_datagram - " + str(message))
         if isinstance(message, Request):
 
             transaction = self._messageLayer.receive_request(message)
@@ -319,6 +320,7 @@ class CoAP(object):
                 transaction = self._blockLayer.send_response(transaction)
 
                 transaction = self._cacheLayer.send_response(transaction)
+
             else:
                 transaction = self._forwardLayer.receive_request_reverse(transaction)
 
@@ -353,7 +355,7 @@ class CoAP(object):
         """
         if not self.stopped.isSet():
             host, port = message.destination
-            logger.debug("send_datagram - " + str(message))
+            logger.info("send_datagram - " + str(message))
             serializer = Serializer()
             message = serializer.serialize(message)
 

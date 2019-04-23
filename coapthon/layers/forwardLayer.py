@@ -1,4 +1,5 @@
 import copy
+import logging
 from coapthon.messages.request import Request
 from coapclient import HelperClient
 from coapthon.messages.response import Response
@@ -7,6 +8,8 @@ from coapthon.resources.remoteResource import RemoteResource
 from coapthon.utils import parse_uri
 
 __author__ = 'Giacomo Tanganelli'
+
+logger = logging.getLogger(__name__)
 
 
 class ForwardLayer(object):
@@ -146,8 +149,10 @@ class ForwardLayer(object):
         request.destination = transaction.resource.remote_server
         request.payload = transaction.request.payload
         request.code = transaction.request.code
+        logger.info("forward_request - " + str(request))
         response = client.send_request(request)
         client.stop()
+        logger.info("forward_response - " + str(response))
         transaction.response.payload = response.payload
         transaction.response.code = response.code
         transaction.response.options = response.options

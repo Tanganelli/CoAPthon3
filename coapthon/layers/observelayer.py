@@ -188,7 +188,7 @@ class ObserveLayer(object):
 
         :param message: the message
         """
-        logger.debug("Remove Subcriber")
+        logger.info("Remove Subcriber")
         host, port = message.destination
         key_token = hash(str(host) + str(port) + str(message.token))
         try:

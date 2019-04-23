@@ -1,5 +1,4 @@
-import logging.config
-import os
+import logging
 import random
 import socket
 import struct
@@ -17,17 +16,13 @@ from coapthon.messages.request import Request
 from coapthon.messages.response import Response
 from coapthon.resources.resource import Resource
 from coapthon.serializer import Serializer
-from coapthon.utils import Tree, create_logging
+from coapthon.utils import Tree
 
 
 __author__ = 'Giacomo Tanganelli'
 
 
-if not os.path.isfile("logging.conf"):
-    create_logging()
-
 logger = logging.getLogger(__name__)
-logging.config.fileConfig("logging.conf", disable_existing_loggers=False)
 
 
 class CoAP(object):
@@ -155,7 +150,7 @@ class CoAP(object):
                     self.send_datagram(rst)
                     continue
 
-                logger.debug("receive_datagram - " + str(message))
+                logger.info("receive_datagram - " + str(message))
                 if isinstance(message, Request):
                     transaction = self._messageLayer.receive_request(message)
                     if transaction.request.duplicated and transaction.completed:
@@ -247,7 +242,7 @@ class CoAP(object):
         """
         if not self.stopped.isSet():
             host, port = message.destination
-            logger.debug("send_datagram - " + str(message))
+            logger.info("send_datagram - " + str(message))
             serializer = Serializer()
             message = serializer.serialize(message)
             self._socket.sendto(message, (host, port))

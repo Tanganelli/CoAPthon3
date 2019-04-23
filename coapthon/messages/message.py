@@ -454,7 +454,7 @@ class Message(object):
         for e in etag:
             option = Option()
             option.number = defines.OptionRegistry.ETAG.number
-            if not  isinstance(e, bytes):
+            if not isinstance(e, bytes):
                 e = bytes(e, "utf-8")
             option.value = e
             self.add_option(option)
@@ -695,7 +695,10 @@ class Message(object):
             .format(source=self._source, destination=self._destination, type=inv_types[self._type], mid=self._mid,
                     code=defines.Codes.LIST[self._code].name, token=self._token)
         for opt in self._options:
-            msg += "{name}: {value}, ".format(name=opt.name, value=opt.value)
+            if 'Block' in opt.name:
+                msg += "{name}: {value}, ".format(name=opt.name, value=parse_blockwise(opt.value))
+            else:
+                msg += "{name}: {value}, ".format(name=opt.name, value=opt.value)
         msg += "]"
         if self.payload is not None:
             if isinstance(self.payload, dict):
