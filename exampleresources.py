@@ -321,31 +321,24 @@ class FetchResource(Resource):
             self.payload = (defines.Content_types["application/json"], tempPayload)
             return self
         else:
-            print request.payload
             query = request.payload
             if ("['" not in query):
                 query = query.replace("[","['").replace(",", "','").replace("]", "']")
-            print query
             query = ast.literal_eval(query)
             tempJson = '{'
             for i, q in enumerate(query):
                 if q in self.allValues:
-                    print self.allValues[q]
                     if i > 0:
                         tempJson += ','
                     tempJson += "'"+str(q)+"': '"+str(self.allValues[q])+"'"
-                    print tempJson
             if tempJson == '{':
                 self.payload =(defines.Codes.NOT_FOUND)
             else:
                 tempJson += '}'
                 self.payload = (defines.Content_types["application/json"], tempJson)
-                print tempJson
-                print self.payload
             return self
 
     def render_PATCH(self, request):
-        print "PATCH OK"
         if not request.payload:
             return self
         else:
@@ -353,11 +346,8 @@ class FetchResource(Resource):
             if ("['" not in query):
                 query = query.replace("{", "{'").replace(":", "':'").replace(",", "','").replace("}", "'}").replace("}','{", "},{")
             query = ast.literal_eval(query)
-            print query
             for i, q in enumerate(query):
                 splitPath = q['path'].split('/');
-                print "SPLIT:" + str(splitPath)
-                print len(splitPath)
                 if (len(splitPath) == 2):
                     AVpath = splitPath[0]
                     AVindex = int(splitPath[1])
@@ -373,19 +363,15 @@ class FetchResource(Resource):
                 if(q['op']=="replace"):
                     if(q['path'] in self.allValues):
                         self.allValues[q['path']] = valueToAdd
-                        print self.allValues
                     else:
                         self.payload = (defines.Codes.NOT_FOUND)
                 else:
                     if(AVpath in self.allValues):
                         if (type(self.allValues[AVpath]) == list ):
-                            print len(self.allValues[AVpath])
                             if (AVindex > len(self.allValues[AVpath])):
-                                print "CI ARRIVO"
                                 self.allValues[AVpath].append(valueToAdd)
                             else:
                                 self.allValues[AVpath].insert(AVindex, valueToAdd)
-                                print self.allValues
                         else:
                             tempValue = [self.allValues[AVpath]]
                             tempValue.insert(AVindex, valueToAdd)
