@@ -49,13 +49,13 @@ class MessageLayer(object):
         return current_mid
 
     def purge(self):
-        for k in list(self._transactions.keys()):
+        for k in self._transactions.keys():
             now = time.time()
             transaction = self._transactions[k]
             if transaction.timestamp + defines.EXCHANGE_LIFETIME < now:
                 logger.debug("Delete transaction")
                 del self._transactions[k]
-        for k in list(self._transactions_token.keys()):
+        for k in self._transactions_token.keys():
             now = time.time()
             transaction = self._transactions_token[k]
             if transaction.timestamp + defines.EXCHANGE_LIFETIME < now:
@@ -79,7 +79,7 @@ class MessageLayer(object):
         key_mid = str_append_hash(host, port, request.mid)
         key_token = str_append_hash(host, port, request.token)
 
-        if key_mid in list(self._transactions.keys()):
+        if key_mid in self._transactions.keys():
             # Duplicated
             self._transactions[key_mid].request.duplicated = True
             transaction = self._transactions[key_mid]
@@ -109,14 +109,14 @@ class MessageLayer(object):
         key_mid_multicast = str_append_hash(defines.ALL_COAP_NODES, port, response.mid)
         key_token = str_append_hash(host, port, response.token)
         key_token_multicast = str_append_hash(defines.ALL_COAP_NODES, port, response.token)
-        if key_mid in list(self._transactions.keys()):
+        if key_mid in self._transactions.keys():
             transaction = self._transactions[key_mid]
             if response.token != transaction.request.token:
                 logger.warning("Tokens does not match -  response message " + str(host) + ":" + str(port))
                 return None, False
         elif key_token in self._transactions_token:
             transaction = self._transactions_token[key_token]
-        elif key_mid_multicast in list(self._transactions.keys()):
+        elif key_mid_multicast in self._transactions.keys():
             transaction = self._transactions[key_mid_multicast]
         elif key_token_multicast in self._transactions_token:
             transaction = self._transactions_token[key_token_multicast]
@@ -155,11 +155,11 @@ class MessageLayer(object):
         key_mid_multicast = str_append_hash(defines.ALL_COAP_NODES, port, message.mid)
         key_token = str_append_hash(host, port, message.token)
         key_token_multicast = str_append_hash(defines.ALL_COAP_NODES, port, message.token)
-        if key_mid in list(self._transactions.keys()):
+        if key_mid in self._transactions.keys():
             transaction = self._transactions[key_mid]
         elif key_token in self._transactions_token:
             transaction = self._transactions_token[key_token]
-        elif key_mid_multicast in list(self._transactions.keys()):
+        elif key_mid_multicast in self._transactions.keys():
             transaction = self._transactions[key_mid_multicast]
         elif key_token_multicast in self._transactions_token:
             transaction = self._transactions_token[key_token_multicast]
@@ -301,8 +301,6 @@ class MessageLayer(object):
             if transaction.request == related:
                 transaction.request.rejected = True
                 message._mid = transaction.request.mid
-                if message.mid is None:
-                    message.mid = self.fetch_mid()
                 message.code = 0
                 message.token = transaction.request.token
                 message.destination = transaction.request.source
@@ -310,8 +308,6 @@ class MessageLayer(object):
                 transaction.response.rejected = True
                 transaction.completed = True
                 message._mid = transaction.response.mid
-                if message.mid is None:
-                    message.mid = self.fetch_mid()
                 message.code = 0
                 message.token = transaction.response.token
                 message.destination = transaction.response.source

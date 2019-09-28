@@ -26,14 +26,6 @@ class ForwardLayer(object):
         :return: the edited transaction
         """
         uri = transaction.request.proxy_uri
-        if uri is None:
-            transaction.response = Response()
-            transaction.response.destination = transaction.request.source
-            transaction.response.token = transaction.request.token
-            transaction.response.type = defines.Types["RST"]
-            transaction.response.code = defines.Codes.BAD_REQUEST.number
-            return transaction
-
         host, port, path = parse_uri(uri)
         path = str("/" + path)
         transaction.response = Response()

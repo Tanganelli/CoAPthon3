@@ -68,7 +68,7 @@ class Message(object):
         :param value: the type
         :raise AttributeError: if value is not a valid type
         """
-        if value not in list(defines.Types.values()):
+        if value not in defines.Types.values():
             raise AttributeError
         self._type = value
 
@@ -246,7 +246,7 @@ class Message(object):
         :param value: the code
         :raise AttributeError: if value is not a valid code
         """
-        if value not in list(defines.Codes.LIST.keys()) and value is not None:
+        if value not in defines.Codes.LIST.keys() and value is not None:
             raise AttributeError
         self._code = value
 
@@ -454,8 +454,6 @@ class Message(object):
         for e in etag:
             option = Option()
             option.number = defines.OptionRegistry.ETAG.number
-            if not  isinstance(e, bytes):
-                e = bytes(e, "utf-8")
             option.value = e
             self.add_option(option)
 
@@ -648,7 +646,7 @@ class Message(object):
 
         :return: the string representing the message
         """
-        inv_types = {v: k for k, v in defines.Types.items()}
+        inv_types = {v: k for k, v in defines.Types.iteritems()}
 
         if self._code is None:
             self._code = defines.Codes.EMPTY.number
@@ -661,7 +659,7 @@ class Message(object):
         msg += "]"
         if self.payload is not None:
             if isinstance(self.payload, dict):
-                tmp = list(self.payload.values())[0][0:20]
+                tmp = self.payload.values()[0][0:20]
             else:
                 tmp = self.payload[0:20]
             msg += " {payload}...{length} bytes".format(payload=tmp, length=len(self.payload))
@@ -680,7 +678,7 @@ class Message(object):
         """
         msg = "Source: " + str(self._source) + "\n"
         msg += "Destination: " + str(self._destination) + "\n"
-        inv_types = {v: k for k, v in defines.Types.items()}
+        inv_types = {v: k for k, v in defines.Types.iteritems()}
         msg += "Type: " + str(inv_types[self._type]) + "\n"
         msg += "MID: " + str(self._mid) + "\n"
         if self._code is None:

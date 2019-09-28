@@ -1,4 +1,4 @@
-from queue import Queue
+from Queue import Queue
 import random
 import threading
 import unittest
@@ -84,11 +84,11 @@ class Tests(unittest.TestCase):
         client.stop()
 
     def client_callback(self, response):
-        print("Callback")
+        print "Callback"
         self.queue.put(response)
 
     def test_not_allowed(self):
-        print("TEST_NOT_ALLOWED")
+        print "TEST_NOT_ALLOWED"
         path = "/void"
         req = Request()
         req.code = defines.Codes.GET.number

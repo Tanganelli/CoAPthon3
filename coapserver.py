@@ -5,7 +5,7 @@ import sys
 from coapthon.server.coap import CoAP
 from exampleresources import BasicResource, Long, Separate, Storage, Big, voidResource, XMLResource, ETAGResource, \
     Child, \
-    MultipleEncodingResource, AdvancedResource, AdvancedResourceSeparate
+    MultipleEncodingResource, AdvancedResource, AdvancedResourceSeparate, FetchResource
 
 __author__ = 'Giacomo Tanganelli'
 
@@ -25,13 +25,15 @@ class CoAPServer(CoAP):
         self.add_resource('child/', Child())
         self.add_resource('advanced/', AdvancedResource())
         self.add_resource('advancedSeparate/', AdvancedResourceSeparate())
+        ##Resource to test FETCH
+        self.add_resource('fetchTest/', FetchResource())
 
-        print(("CoAP Server start on " + host + ":" + str(port)))
-        print((self.root.dump()))
+        print "CoAP Server start on " + host + ":" + str(port)
+        print self.root.dump()
 
 
 def usage():  # pragma: no cover
-    print("coapserver.py -i <ip address> -p <port>")
+    print "coapserver.py -i <ip address> -p <port>"
 
 
 def main(argv):  # pragma: no cover
@@ -58,9 +60,9 @@ def main(argv):  # pragma: no cover
     try:
         server.listen(10)
     except KeyboardInterrupt:
-        print("Server Shutdown")
+        print "Server Shutdown"
         server.close()
-        print("Exiting...")
+        print "Exiting..."
 
 
 if __name__ == "__main__":  # pragma: no cover

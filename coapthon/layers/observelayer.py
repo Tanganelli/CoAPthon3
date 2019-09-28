@@ -43,6 +43,9 @@ class ObserveLayer(object):
             key_token = hash(str(host) + str(port) + str(request.token))
 
             self._relations[key_token] = ObserveItem(time.time(), None, True, None)
+        if request.observe == 1:
+            # Cancelling observe explicitly
+            self.remove_subscriber(request)
 
         return request
 
@@ -167,7 +170,7 @@ class ObserveLayer(object):
             resource_list = root.with_prefix_resource(resource.path)
         else:
             resource_list = [resource]
-        for key in list(self._relations.keys()):
+        for key in self._relations.keys():
             if self._relations[key].transaction.resource in resource_list:
                 if self._relations[key].non_counter > defines.MAX_NON_NOTIFICATIONS \
                         or self._relations[key].transaction.request.type == defines.Types["CON"]:
@@ -194,6 +197,8 @@ class ObserveLayer(object):
         try:
             self._relations[key_token].transaction.completed = True
             del self._relations[key_token]
+        except AttributeError:
+            logger.warning("No Transaction")
         except KeyError:
             logger.warning("No Subscriber")
 

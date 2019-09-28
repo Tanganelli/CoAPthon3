@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from queue import Queue
+from Queue import Queue
 import random
 import socket
 import threading
@@ -38,8 +38,6 @@ class Tests(unittest.TestCase):
             if message is not None:
                 received_message = client.send_request(message)
             if expected is not None:
-                # print(received_message.payload)
-                # print(expected.payload)
                 if expected.type is not None:
                     self.assertEqual(received_message.type, expected.type)
                 if expected.mid is not None:
@@ -60,7 +58,7 @@ class Tests(unittest.TestCase):
         client.stop()
 
     def client_callback(self, response):
-        print("Callback")
+        print "Callback"
         self.queue.put(response)
 
     def _test_with_client_observe(self, message_list, callback):  # pragma: no cover
@@ -125,7 +123,7 @@ class Tests(unittest.TestCase):
         sock.close()
 
     def test_td_coap_link_01(self):
-        print("TD_COAP_LINK_01")
+        print "TD_COAP_LINK_01"
         path = "/.well-known/core"
         req = Request()
         req.code = defines.Codes.GET.number
@@ -140,12 +138,13 @@ class Tests(unittest.TestCase):
         expected.code = defines.Codes.CONTENT.number
         expected.token = None
         expected.content_type = defines.Content_types["application/link-format"]
-        expected.payload = """</large>;</large-update>;</long>;</obs>;obs,</query>;rt="Type1";sz="13",</seg1>;rt="Type1";sz="13",</seg1/seg2>;rt="Type1";sz="13",</seg1/seg2/seg3>;rt="Type1";sz="13",</separate>;ct=0;if="separate",</test>;rt="Type1";sz="13","""
+        expected.payload = """</separate>;ct=0;if="separate",</large-update>;</seg1/seg2/seg3>;rt="Type1";sz="13",</large>;</seg1/seg2>;rt="Type1";sz="13",</test>;rt="Type1";sz="13",</obs>;obs,</long>;</seg1>;rt="Type1";sz="13",</query>;rt="Type1";sz="13","""
+
         self.current_mid += 1
         self._test_with_client([(req, expected)])
 
     def test_td_coap_link_02(self):
-        print("TD_COAP_LINK_02")
+        print "TD_COAP_LINK_02"
         path = "/.well-known/core"
         req = Request()
         req.code = defines.Codes.GET.number
@@ -161,12 +160,13 @@ class Tests(unittest.TestCase):
         expected.code = defines.Codes.CONTENT.number
         expected.token = None
         expected.content_type = defines.Content_types["application/link-format"]
-        expected.payload = """</query>;rt="Type1";sz="13",</seg1>;rt="Type1";sz="13",</seg1/seg2>;rt="Type1";sz="13",</seg1/seg2/seg3>;rt="Type1";sz="13",</test>;rt="Type1";sz="13","""
+        expected.payload = """</seg1/seg2/seg3>;rt="Type1";sz="13",</seg1/seg2>;rt="Type1";sz="13",</test>;rt="Type1";sz="13",</seg1>;rt="Type1";sz="13",</query>;rt="Type1";sz="13","""
+
         self.current_mid += 1
         self._test_with_client([(req, expected)])
 
     def test_td_coap_core_01(self):
-        print("TD_COAP_CORE_01")
+        print "TD_COAP_CORE_01"
         path = "/test"
         req = Request()
         req.code = defines.Codes.GET.number
@@ -186,7 +186,7 @@ class Tests(unittest.TestCase):
         self._test_with_client([(req, expected)])
 
     def test_td_coap_core_02(self):
-        print("TD_COAP_CORE_02")
+        print "TD_COAP_CORE_02"
         path = "/test_post"
         req = Request()
 
@@ -210,7 +210,7 @@ class Tests(unittest.TestCase):
         self._test_with_client([(req, expected)])
 
     def test_td_coap_core_03(self):
-        print("TD_COAP_CORE_03")
+        print "TD_COAP_CORE_03"
         path = "/test"
         req = Request()
 
@@ -272,7 +272,7 @@ class Tests(unittest.TestCase):
         self._test_with_client([exchange1, exchange2, exchange3])
 
     def test_td_coap_core_04(self):
-        print("TD_COAP_CORE_04")
+        print "TD_COAP_CORE_04"
         path = "/test"
         req = Request()
 
@@ -293,7 +293,7 @@ class Tests(unittest.TestCase):
         self._test_with_client([(req, expected)])
 
     def test_td_coap_core_05(self):
-        print("TD_COAP_CORE_05")
+        print "TD_COAP_CORE_05"
         path = "/test"
         req = Request()
 
@@ -314,7 +314,7 @@ class Tests(unittest.TestCase):
         self._test_with_client([(req, expected)])
 
     def test_td_coap_core_06(self):
-        print("TD_COAP_CORE_06")
+        print "TD_COAP_CORE_06"
         path = "/test_post"
         req = Request()
 
@@ -338,7 +338,7 @@ class Tests(unittest.TestCase):
         self._test_with_client([(req, expected)])
 
     def test_td_coap_core_07(self):
-        print("TD_COAP_CORE_07")
+        print "TD_COAP_CORE_07"
         path = "/test"
         req = Request()
 
@@ -361,7 +361,7 @@ class Tests(unittest.TestCase):
         self._test_with_client([(req, expected)])
 
     def test_td_coap_core_08(self):
-        print("TD_COAP_CORE_08")
+        print "TD_COAP_CORE_08"
         path = "/test"
         req = Request()
 
@@ -382,7 +382,7 @@ class Tests(unittest.TestCase):
         self._test_with_client([(req, expected)])
 
     def test_td_coap_core_09(self):
-        print("TD_COAP_CORE_09")
+        print "TD_COAP_CORE_09"
         path = "/separate"
         req = Request()
 
@@ -410,7 +410,7 @@ class Tests(unittest.TestCase):
         self._test_plugtest([(req, expected), (None, expected2)])
 
     def test_td_coap_core_10(self):
-        print("TD_COAP_CORE_10")
+        print "TD_COAP_CORE_10"
         path = "/test"
         req = Request()
 
@@ -433,7 +433,7 @@ class Tests(unittest.TestCase):
         self._test_with_client([(req, expected)])
 
     def test_td_coap_core_12(self):
-        print("TD_COAP_CORE_12")
+        print "TD_COAP_CORE_12"
         path = "/seg1/seg2/seg3"
         req = Request()
 
@@ -453,7 +453,7 @@ class Tests(unittest.TestCase):
         self._test_with_client([(req, expected)])
 
     def test_td_coap_core_13(self):
-        print("TD_COAP_CORE_13")
+        print "TD_COAP_CORE_13"
         path = "/query?first=1&second=2&third=3"
         req = Request()
 
@@ -474,7 +474,7 @@ class Tests(unittest.TestCase):
         self._test_with_client([(req, expected)])
 
     def test_td_coap_obs_01(self):
-        print("TD_COAP_OBS_01")
+        print "TD_COAP_OBS_01"
         path = "/obs"
         req = Request()
 
@@ -506,7 +506,7 @@ class Tests(unittest.TestCase):
         self._test_plugtest([(req, expected), (None, expected2)])
 
     def test_td_coap_obs_03(self):
-        print("TD_COAP_OBS_03")
+        print "TD_COAP_OBS_03"
         path = "/obs"
         req = Request()
 
@@ -548,7 +548,7 @@ class Tests(unittest.TestCase):
         self._test_plugtest([(req, expected), (None, expected2), (rst, None)])
 
     def test_td_coap_block_01(self):
-        print("TD_COAP_BLOCK_01")
+        print "TD_COAP_BLOCK_01"
         path = "/large"
 
         req = Request()
@@ -594,7 +594,7 @@ class Tests(unittest.TestCase):
         self._test_plugtest([exchange1, exchange2])
 
     def test_td_coap_block_01_client(self):
-        print("TD_COAP_BLOCK_01")
+        print "TD_COAP_BLOCK_01"
         path = "/large"
 
         req = Request()
@@ -640,7 +640,7 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
         self._test_with_client([exchange1])
 
     def test_td_coap_block_02_client(self):
-        print("TD_COAP_BLOCK_02")
+        print "TD_COAP_BLOCK_02"
         path = "/large"
 
         req = Request()
@@ -685,7 +685,7 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
         self._test_with_client([exchange1])
 
     def test_td_coap_block_02(self):
-        print("TD_COAP_BLOCK_02")
+        print "TD_COAP_BLOCK_02"
         path = "/large"
 
         req = Request()
@@ -730,7 +730,7 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
         self._test_plugtest([exchange1, exchange2])
 
     def test_td_coap_block_03(self):
-        print("TD_COAP_BLOCK_03")
+        print "TD_COAP_BLOCK_03"
         path = "/large-update"
 
         req = Request()
@@ -794,7 +794,7 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
         self._test_plugtest([exchange1, exchange2, exchange3])
 
     def test_duplicate(self):
-        print("TEST_DUPLICATE")
+        print "TEST_DUPLICATE"
         path = "/test"
         req = Request()
         req.code = defines.Codes.GET.number
@@ -813,7 +813,7 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
         self._test_plugtest([(req, expected), (req, expected)])
 
     def test_duplicate_not_completed(self):
-        print("TEST_DUPLICATE_NOT_COMPLETED")
+        print "TEST_DUPLICATE_NOT_COMPLETED"
         path = "/long"
         req = Request()
         req.code = defines.Codes.GET.number
@@ -838,7 +838,7 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
         self._test_plugtest([(req, None), (req, expected), (None, expected2)])
 
     def test_no_response(self):
-        print("TEST_NO_RESPONSE")
+        print "TEST_NO_RESPONSE"
         path = "/long"
         req = Request()
         req.code = defines.Codes.GET.number
@@ -863,7 +863,7 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
         self._test_plugtest([(req, expected), (None, expected2), (None, expected2),  (None, expected2)])
 
     def test_edit_resource(self):
-        print("TEST_EDIT_RESOURCE")
+        print "TEST_EDIT_RESOURCE"
         path = "/obs"
         req = Request()
 

@@ -12,11 +12,11 @@ class CoAPReverseProxy(CoAP):
         CoAP.__init__(self, (host, port), xml_file=xml_file, multicast=multicast, starting_mid=starting_mid,
                       cache=cache)
 
-        print(("CoAP Proxy start on " + host + ":" + str(port)))
+        print "CoAP Proxy start on " + host + ":" + str(port)
 
 
 def usage():  # pragma: no cover
-    print("coapreverseproxy.py -i <ip address> -p <port> -f <xml_file>")
+    print "coapreverseproxy.py -i <ip address> -p <port> -f <xml_file>"
 
 
 def main(argv):  # pragma: no cover
@@ -43,9 +43,9 @@ def main(argv):  # pragma: no cover
     try:
         server.listen(10)
     except KeyboardInterrupt:
-        print("Server Shutdown")
+        print "Server Shutdown"
         server.close()
-        print("Exiting...")
+        print "Exiting..."
 
 
 if __name__ == "__main__":  # pragma: no cover

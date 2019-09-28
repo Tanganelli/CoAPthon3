@@ -42,7 +42,7 @@ class CoAPServerPlugTest(CoAP):
 
 
 def usage():  # pragma: no cover
-    print("plugtest_coapserver.py -i <ip address> -p <port>")
+    print "plugtest_coapserver.py -i <ip address> -p <port>"
 
 
 def main(argv):  # pragma: no cover
@@ -66,9 +66,9 @@ def main(argv):  # pragma: no cover
     try:
         server.listen(10)
     except KeyboardInterrupt:
-        print("Server Shutdown")
+        print "Server Shutdown"
         server.close()
-        print("Exiting...")
+        print "Exiting..."
 
 
 if __name__ == "__main__":

@@ -58,22 +58,12 @@ class Option(object):
 
         :param value: the option value
         """
-        opt_type = defines.OptionRegistry.LIST[self._number].value_type
-        if opt_type == defines.INTEGER:
-            if type(value) is not int:
-                value = int(value)
-            if byte_len(value) == 0:
-                value = 0
-        elif opt_type == defines.STRING:
-            if type(value) is not str:
-                value = str(value)
-        elif opt_type == defines.OPAQUE:
-            if type(value) is bytes:
-                pass
-            else:
-                if value is not None:
-                    value = bytes(value, "utf-8")
-
+        if type(value) is str:
+            value = bytearray(value, "utf-8")
+        elif type(value) is int and byte_len(value) != 0:
+            value = value
+        elif type(value) is int and byte_len(value) == 0:
+            value = 0
         self._value = value
 
     @property

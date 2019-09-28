@@ -54,7 +54,7 @@ class Serializer(object):
                 fmt = "%ss" % token_length
                 s = struct.Struct(fmt)
                 token_value = s.unpack_from(datagram[pos:])[0]
-                message.token = token_value.decode("utf-8")
+                message.token = token_value
             else:
                 message.token = None
 
@@ -64,7 +64,7 @@ class Serializer(object):
             length_packet = len(values)
             pos = 0
             while pos < length_packet:
-                next_byte = struct.unpack("B", values[pos].to_bytes(1, "big"))[0]
+                next_byte = struct.unpack("B", values[pos])[0]
                 pos += 1
                 if next_byte != int(defines.PAYLOAD_MARKER):
                     # the first 4 bits of the byte represent the option delta
@@ -90,12 +90,15 @@ class Serializer(object):
                             tmp = values[pos: pos + option_length]
                             value = 0
                             for b in tmp:
-                                value = (value << 8) | struct.unpack("B", b.to_bytes(1, "big"))[0]
+                                value = (value << 8) | struct.unpack("B", b)[0]
                         elif option_item.value_type == defines.OPAQUE:
                             tmp = values[pos: pos + option_length]
-                            value = tmp
+                            value = bytearray(tmp)
                         else:
-                            value = values[pos: pos + option_length]
+                            tmp = values[pos: pos + option_length]
+                            value = ""
+                            for b in tmp:
+                                value += str(b)
 
                         option = Option()
                         option.number = current_option
@@ -113,15 +116,9 @@ class Serializer(object):
                         raise AttributeError("Packet length %s, pos %s" % (length_packet, pos))
                     message.payload = ""
                     payload = values[pos:]
-                    try:
-                        if message.payload_type == defines.Content_types["application/octet-stream"]:
-                            message.payload = payload
-                        else:
-                            message.payload = payload.decode("utf-8")
-                    except AttributeError:
-                        message.payload = payload.decode("utf-8")
-                    pos += len(payload)
-
+                    for b in payload:
+                        message.payload += str(b)
+                        pos += 1
             return message
         except AttributeError:
             return defines.Codes.BAD_REQUEST.number
@@ -148,14 +145,13 @@ class Serializer(object):
         tmp |= message.type
         tmp <<= 4
         tmp |= tkl
-
         values = [tmp, message.code, message.mid]
 
         if message.token is not None and tkl > 0:
 
             for b in str(message.token):
                 fmt += "c"
-                values.append(bytes(b, "utf-8"))
+                values.append(b)
 
         options = Serializer.as_sorted_list(message.options)  # already sorted
         lastoptionnumber = 0
@@ -198,13 +194,14 @@ class Serializer(object):
                         fmt += "B"
                         values.append(words[num])
                 elif opt_type == defines.STRING:
-                    fmt += str(len(bytes(option.value, "utf-8"))) + "s"
-                    values.append(bytes(option.value, "utf-8"))
-
-                else:  # OPAQUE
+                    for b in str(option.value):
+                        fmt += "c"
+                        values.append(b)
+                else:
                     for b in option.value:
                         fmt += "B"
                         values.append(b)
+
 
             # update last option number
             lastoptionnumber = option.number
@@ -219,21 +216,13 @@ class Serializer(object):
             fmt += "B"
             values.append(defines.PAYLOAD_MARKER)
 
-            if isinstance(payload, bytes):
-                fmt += str(len(payload)) + "s"
-                values.append(payload)
-            else:
-                fmt += str(len(bytes(payload, "utf-8"))) + "s"
-                values.append(bytes(payload, "utf-8"))
-            # for b in str(payload):
-            #     fmt += "c"
-            #     values.append(bytes(b, "utf-8"))
+            for b in str(payload):
+                fmt += "c"
+                values.append(b)
 
         datagram = None
         if values[1] is None:
             values[1] = 0
-        if values[2] is None:
-            values[2] = 0
         try:
             s = struct.Struct(fmt)
             datagram = ctypes.create_string_buffer(s.size)
@@ -241,8 +230,6 @@ class Serializer(object):
         except struct.error:
             # The .exception method will report on the exception encountered
             # and provide a traceback.
-            logger.debug(fmt)
-            logger.debug(values)
             logging.exception('Failed to pack structure')
 
         return datagram
@@ -276,12 +263,12 @@ class Serializer(object):
         if nibble <= 12:
             return nibble, pos
         elif nibble == 13:
-            tmp = struct.unpack("!B", values[pos].to_bytes(1, "big"))[0] + 13
+            tmp = struct.unpack("!B", values[pos])[0] + 13
             pos += 1
             return tmp, pos
         elif nibble == 14:
             s = struct.Struct("!H")
-            tmp = s.unpack_from(values[pos:].to_bytes(2, "big"))[0] + 269
+            tmp = s.unpack_from(values[pos:])[0] + 269
             pos += 2
             return tmp, pos
         else:
@@ -302,11 +289,11 @@ class Serializer(object):
         if h_nibble <= 12:
             value = h_nibble
         elif h_nibble == 13:
-            value = struct.unpack("!B", values[pos].to_bytes(1, "big"))[0] + 13
+            value = struct.unpack("!B", values[pos])[0] + 13
             pos += 1
         elif h_nibble == 14:
             s = struct.Struct("!H")
-            value = s.unpack_from(values[pos:].to_bytes(2, "big"))[0] + 269
+            value = s.unpack_from(values[pos:])[0] + 269
             pos += 2
         else:
             raise AttributeError("Unsupported option number nibble " + str(h_nibble))
@@ -314,10 +301,10 @@ class Serializer(object):
         if l_nibble <= 12:
             length = l_nibble
         elif l_nibble == 13:
-            length = struct.unpack("!B", values[pos].to_bytes(1, "big"))[0] + 13
+            length = struct.unpack("!B", values[pos])[0] + 13
             pos += 1
         elif l_nibble == 14:
-            length = s.unpack_from(values[pos:].to_bytes(2, "big"))[0] + 269
+            length = s.unpack_from(values[pos:])[0] + 269
             pos += 2
         else:
             raise AttributeError("Unsupported option length nibble " + str(l_nibble))
@@ -337,20 +324,12 @@ class Serializer(object):
         opt_type = defines.OptionRegistry.LIST[number].value_type
 
         if length == 0 and opt_type != defines.INTEGER:
-            return bytes()
-        elif length == 0 and opt_type == defines.INTEGER:
+            return bytearray()
+        if length == 0 and opt_type == defines.INTEGER:
             return 0
-        elif opt_type == defines.STRING:
-            if isinstance(value, bytes):
-                return value.decode("utf-8")
-        elif opt_type == defines.OPAQUE:
-            if isinstance(value, bytes):
-                return value
-            else:
-                return bytes(value, "utf-8")
         if isinstance(value, tuple):
             value = value[0]
-        if isinstance(value, str):
+        if isinstance(value, unicode):
             value = str(value)
         if isinstance(value, str):
             return bytearray(value, "utf-8")
@@ -367,7 +346,7 @@ class Serializer(object):
         :return: the sorted list
         """
         if len(options) > 0:
-            options = sorted(options, key=lambda o: o.number)
+            options.sort(None, key=lambda o: o.number)
         return options
 
     @staticmethod

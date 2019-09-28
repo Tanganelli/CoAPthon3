@@ -11,11 +11,11 @@ class CoAPForwardProxy(CoAP):
     def __init__(self, host, port,  multicast=False, cache=False):
         CoAP.__init__(self, (host, port), multicast=multicast, cache=cache)
 
-        print(("CoAP Proxy start on " + host + ":" + str(port)))
+        print "CoAP Proxy start on " + host + ":" + str(port)
 
 
 def usage():  # pragma: no cover
-    print("coapforwardproxy.py -i <ip address> -p <port>")
+    print "coapforwardproxy.py -i <ip address> -p <port>"
 
 
 def main(argv):  # pragma: no cover
@@ -39,9 +39,9 @@ def main(argv):  # pragma: no cover
     try:
         server.listen(10)
     except KeyboardInterrupt:
-        print("Server Shutdown")
+        print "Server Shutdown"
         server.close()
-        print("Exiting...")
+        print "Exiting..."
 
 
 if __name__ == "__main__":  # pragma: no cover

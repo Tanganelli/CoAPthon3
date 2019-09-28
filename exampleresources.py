@@ -1,7 +1,14 @@
 import time
+import ast
 from coapthon import defines
 
 from coapthon.resources.resource import Resource
+
+##VAR DUMP
+import pprint
+
+#Per JSON
+import json
 
 __author__ = 'Giacomo Tanganelli'
 
@@ -178,7 +185,8 @@ class MultipleEncodingResource(Resource):
         elif request.accept == defines.Content_types["text/plain"]:
             self.payload = (defines.Content_types["text/plain"], str(self.value))
         return self
-
+    def render_FETCH(self, request):
+        return self
     def render_PUT(self, request):
         self.edit_resource(request)
         return self
@@ -279,3 +287,121 @@ class AdvancedResourceSeparate(Resource):
     def render_DELETE_separate(self, request, response):
         response.payload = "Response deleted"
         return True, response
+
+class FetchResource(Resource):
+    def __init__(self, name="FetchResource", coap_server=None):
+        super(FetchResource, self).__init__(name, coap_server, visible=True,
+                                            observable=True, allow_children=True)
+        self.x_coord = 256
+        self.y_coord = 45
+        self.foo = ["bar", "baz"]
+        print type(self.foo)
+        self.allValues = {
+            'x-coord': self.x_coord,
+            'y-coord':self.y_coord,
+            'foo': self.foo
+        }
+
+        self.resource_type = "rt1"
+        #self.content_type = "application/json"
+        self.interface_type = "if1"
+
+    def render_GET(self, request):
+        return self
+
+    def render_FETCH(self, request):
+        if not request.payload:
+            tempPayload = '{'
+            #print "non ce"
+            for i, q in enumerate(self.allValues):
+                if i > 0:
+                    tempPayload += ','
+                tempPayload += "'" + str(q) + "': '" + str(self.allValues[q]) + "'"
+            tempPayload += '}'
+            self.payload = (defines.Content_types["application/json"], tempPayload)
+            return self
+        else:
+            print request.payload
+            query = request.payload
+            if ("['" not in query):
+                query = query.replace("[","['").replace(",", "','").replace("]", "']")
+            print query
+            query = ast.literal_eval(query)
+            tempJson = '{'
+            for i, q in enumerate(query):
+                if q in self.allValues:
+                    print self.allValues[q]
+                    if i > 0:
+                        tempJson += ','
+                    tempJson += "'"+str(q)+"': '"+str(self.allValues[q])+"'"
+                    print tempJson
+            if tempJson == '{':
+                self.payload =(defines.Codes.NOT_FOUND)
+            else:
+                tempJson += '}'
+                self.payload = (defines.Content_types["application/json"], tempJson)
+                print tempJson
+                print self.payload
+            return self
+
+    def render_PATCH(self, request):
+        print "PATCH OK"
+        if not request.payload:
+            return self
+        else:
+            query = request.payload
+            if ("['" not in query):
+                query = query.replace("{", "{'").replace(":", "':'").replace(",", "','").replace("}", "'}").replace("}','{", "},{")
+            query = ast.literal_eval(query)
+            print query
+            for i, q in enumerate(query):
+                splitPath = q['path'].split('/');
+                print "SPLIT:" + str(splitPath)
+                print len(splitPath)
+                if (len(splitPath) == 2):
+                    AVpath = splitPath[0]
+                    AVindex = int(splitPath[1])
+                else:
+                    AVpath = splitPath[0]
+                    AVindex = -1
+                try:
+                    int(q['value'])
+                    valueToAdd = int(q['value'])
+                except ValueError:
+                    valueToAdd = q['value']
+
+                if(q['op']=="replace"):
+                    if(q['path'] in self.allValues):
+                        self.allValues[q['path']] = valueToAdd
+                        print self.allValues
+                    else:
+                        self.payload = (defines.Codes.NOT_FOUND)
+                else:
+                    if(AVpath in self.allValues):
+                        if (type(self.allValues[AVpath]) == list ):
+                            print len(self.allValues[AVpath])
+                            if (AVindex > len(self.allValues[AVpath])):
+                                print "CI ARRIVO"
+                                self.allValues[AVpath].append(valueToAdd)
+                            else:
+                                self.allValues[AVpath].insert(AVindex, valueToAdd)
+                                print self.allValues
+                        else:
+                            tempValue = [self.allValues[AVpath]]
+                            tempValue.insert(AVindex, valueToAdd)
+                            self.allValues[AVpath] = tempValue
+
+                    else:
+                        self.payload = (defines.Codes.NOT_FOUND)
+            return self
+
+    def render_PUT(self, request):
+        self.edit_resource(request)
+        return self
+
+    def render_POST(self, request):
+        res = self.init_resource(request, FetchResource())
+        return res
+
+    def render_DELETE(self, request):
+        return True

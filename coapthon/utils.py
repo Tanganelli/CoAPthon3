@@ -156,11 +156,11 @@ class Tree(object):
 
         :return: registered resources.
         """
-        return sorted(list(self.tree.keys()))
+        return self.tree.keys()
 
     def with_prefix(self, path):
         ret = []
-        for key in list(self.tree.keys()):
+        for key in self.tree.keys():
             if path.startswith(key):
                 ret.append(key)
 
@@ -170,7 +170,7 @@ class Tree(object):
 
     def with_prefix_resource(self, path):
         ret = []
-        for key, value in self.tree.items():
+        for key, value in self.tree.iteritems():
             if path.startswith(key):
                 ret.append(value)
 

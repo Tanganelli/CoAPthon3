@@ -1,4 +1,4 @@
-from queue import Queue
+from Queue import Queue
 import random
 import socket
 import threading
@@ -87,7 +87,7 @@ class Tests(unittest.TestCase):
         client.stop()
 
     def client_callback(self, response):
-        print("Callback")
+        print "Callback"
         self.queue.put(response)
 
     def _test_plugtest(self, message_list):  # pragma: no cover
@@ -151,7 +151,7 @@ class Tests(unittest.TestCase):
         sock.close()
 
     def test_not_allowed(self):
-        print("TEST_NOT_ALLOWED")
+        print "TEST_NOT_ALLOWED"
         path = "/void"
         req = Request()
         req.code = defines.Codes.GET.number
@@ -300,7 +300,7 @@ class Tests(unittest.TestCase):
     #     self._test_with_client([exchange1, exchange2, exchange3, exchange4])
 
     def test_post(self):
-        print("TEST_POST")
+        print "TEST_POST"
         path = "/storage/new_res?id=1"
         req = Request()
 
@@ -398,7 +398,7 @@ class Tests(unittest.TestCase):
         self._test_with_client([exchange1, exchange2, exchange3, exchange4, exchange5])
 
     def test_post_block(self):
-        print("TEST_POST_BLOCK")
+        print "TEST_POST_BLOCK"
         path = "/storage/new_res"
         req = Request()
 
@@ -533,7 +533,7 @@ class Tests(unittest.TestCase):
         self._test_plugtest([exchange1, exchange2, exchange3, exchange4, exchange5])
 
     def test_get_block(self):
-        print("TEST_GET_BLOCK")
+        print "TEST_GET_BLOCK"
         path = "/big"
 
         req = Request()
@@ -699,7 +699,7 @@ class Tests(unittest.TestCase):
         self._test_plugtest([exchange1, exchange2, exchange3, exchange4, exchange5, exchange6, exchange7, exchange8])
 
     def test_post_block_big(self):
-        print("TEST_POST_BLOCK_BIG")
+        print "TEST_POST_BLOCK_BIG"
         path = "/big"
         req = Request()
 
@@ -864,7 +864,7 @@ class Tests(unittest.TestCase):
         self._test_plugtest([exchange1, exchange2, exchange3, exchange4, exchange5, exchange6, exchange7])
 
     def test_options(self):
-        print("TEST_OPTIONS")
+        print "TEST_OPTIONS"
         path = "/storage/new_res"
 
         req = Request()
@@ -941,78 +941,78 @@ class Tests(unittest.TestCase):
 
         self._test_with_client([exchange1, exchange2, exchange3])
 
-    # def test_long_options(self):
-    #     """
-    #     Test processing of options with extended length
-    #     """
-    #     print("TEST_LONG_OPTIONS")
-    #
-    #     path = "/storage/"
-    #     req = Request()
-    #     req.code = defines.Codes.GET.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     option = Option()
-    #     # This option should be silently ignored by the server
-    #     # since it is not critical
-    #     option.number = defines.OptionRegistry.RM_MESSAGE_SWITCHING.number
-    #     option.value = "\1\1\1\1\0\0"
-    #     options = req.options
-    #     req.add_option(option)
-    #     req.payload = "test"
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected.code = defines.Codes.CONTENT.number
-    #     expected.token = None
-    #     expected.payload = None
-    #
-    #     exchange1 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     self._test_with_client([exchange1])
-    #
-    #     # This option (244) should be silently ignored by the server
-    #     req = ("\x40\x01\x01\x01\xd6\xe7\x01\x01\x01\x01\x00\x00", self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.NOT_FOUND.number
-    #     expected.token = None
-    #     expected.payload = None
-    #
-    #     exchange21 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     # This option (245) should cause BAD REQUEST, as unrecognizable critical
-    #     req = ("\x40\x01\x01\x01\xd6\xe8\x01\x01\x01\x01\x00\x00", self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange22 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     # This option (65525) should cause BAD REQUEST, as unrecognizable critical
-    #     req = ("\x40\x01\x01\x01\xe6\xfe\xe8\x01\x01\x01\x01\x00\x00", self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange23 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     self._test_datagram([exchange21, exchange22, exchange23])
+    def test_long_options(self):
+        """
+        Test processing of options with extended length
+        """
+        print "TEST_LONG_OPTIONS"
+
+        path = "/storage/"
+        req = Request()
+        req.code = defines.Codes.GET.number
+        req.uri_path = path
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        option = Option()
+        # This option should be silently ignored by the server
+        # since it is not critical
+        option.number = defines.OptionRegistry.RM_MESSAGE_SWITCHING.number
+        option.value = "\1\1\1\1\0\0"
+        options = req.options
+        req.add_option(option)
+        req.payload = "test"
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected.code = defines.Codes.CONTENT.number
+        expected.token = None
+        expected.payload = None
+
+        exchange1 = (req, expected)
+        self.current_mid += 1
+
+        self._test_with_client([exchange1])
+
+        # This option (244) should be silently ignored by the server
+        req = ("\x40\x01\x01\x01\xd6\xe7\x01\x01\x01\x01\x00\x00", self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = None
+        expected.code = defines.Codes.NOT_FOUND.number
+        expected.token = None
+        expected.payload = None
+
+        exchange21 = (req, expected)
+        self.current_mid += 1
+
+        # This option (245) should cause BAD REQUEST, as unrecognizable critical
+        req = ("\x40\x01\x01\x01\xd6\xe8\x01\x01\x01\x01\x00\x00", self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange22 = (req, expected)
+        self.current_mid += 1
+
+        # This option (65525) should cause BAD REQUEST, as unrecognizable critical
+        req = ("\x40\x01\x01\x01\xe6\xfe\xe8\x01\x01\x01\x01\x00\x00", self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange23 = (req, expected)
+        self.current_mid += 1
+
+        self._test_datagram([exchange21, exchange22, exchange23])
 
     def test_content_type(self):
-        print("TEST_CONTENT_TYPE")
+        print "TEST_CONTENT_TYPE"
         path = "/storage/new_res"
 
         req = Request()
@@ -1138,7 +1138,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = "<value>0</value>"
 
-        print((expected.pretty_print()))
+        print(expected.pretty_print())
 
         exchange7 = (req, expected)
         self.current_mid += 1
@@ -1203,7 +1203,7 @@ class Tests(unittest.TestCase):
         self._test_with_client([exchange1, exchange2, exchange3, exchange4, exchange5])
 
     def test_ETAG(self):
-        print("TEST_ETAG")
+        print "TEST_ETAG"
         path = "/etag"
 
         req = Request()
@@ -1219,7 +1219,7 @@ class Tests(unittest.TestCase):
         expected.code = defines.Codes.CONTENT.number
         expected.token = None
         expected.payload = "ETag resource"
-        expected.etag = bytes("0", "utf-8")
+        expected.etag = "0"
 
         exchange1 = (req, expected)
         self.current_mid += 1
@@ -1250,7 +1250,7 @@ class Tests(unittest.TestCase):
         req.type = defines.Types["CON"]
         req._mid = self.current_mid
         req.destination = self.server_address
-        req.etag = bytes("1", "utf-8")
+        req.etag = "1"
 
         expected = Response()
         expected.type = defines.Types["ACK"]
@@ -1258,7 +1258,7 @@ class Tests(unittest.TestCase):
         expected.code = defines.Codes.VALID.number
         expected.token = None
         expected.payload = "test"
-        expected.etag = bytes("1", "utf-8")
+        expected.etag = "1"
 
         exchange3 = (req, expected)
         self.current_mid += 1
@@ -1284,7 +1284,7 @@ class Tests(unittest.TestCase):
         self._test_with_client([exchange1, exchange2, exchange3, exchange4])
 
     def test_child(self):
-        print("TEST_CHILD")
+        print "TEST_CHILD"
         path = "/child"
 
         req = Request()
@@ -1361,7 +1361,7 @@ class Tests(unittest.TestCase):
         self._test_with_client([exchange1, exchange2, exchange3, exchange4])
 
     def test_not_found(self):
-        print("TEST_not_found")
+        print "TEST_not_found"
         path = "/not_found"
 
         req = Request()
@@ -1436,63 +1436,63 @@ class Tests(unittest.TestCase):
 
         self._test_with_client([exchange1, exchange2, exchange3, exchange4])
 
-    # def test_invalid(self):
-    #     print("TEST_INVALID")
-    #
-    #     # version
-    #     req = ("\x00\x01\x8c\xda", self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange1 = (req, expected)
-    #
-    #     # version
-    #     req = ("\x40", self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange2 = (req, expected)
-    #
-    #     # code
-    #     req = ("\x40\x05\x8c\xda", self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange3 = (req, expected)
-    #
-    #     # option
-    #     req = ("\x40\x01\x8c\xda\x94", self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange4 = (req, expected)
-    #
-    #     # payload marker
-    #     req = ("\x40\x02\x8c\xda\x75\x62\x61\x73\x69\x63\xff", self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange5 = (req, expected)
-    #
-    #     self._test_datagram([exchange1, exchange2, exchange3, exchange4, exchange5])
+    def test_invalid(self):
+        print "TEST_INVALID"
+
+        # version
+        req = ("\x00\x01\x8c\xda", self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange1 = (req, expected)
+
+        # version
+        req = ("\x40", self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange2 = (req, expected)
+
+        # code
+        req = ("\x40\x05\x8c\xda", self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange3 = (req, expected)
+
+        # option
+        req = ("\x40\x01\x8c\xda\x94", self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange4 = (req, expected)
+
+        # payload marker
+        req = ("\x40\x02\x8c\xda\x75\x62\x61\x73\x69\x63\xff", self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange5 = (req, expected)
+
+        self._test_datagram([exchange1, exchange2, exchange3, exchange4, exchange5])
 
     def test_post_block_big_client(self):
-        print("TEST_POST_BLOCK_BIG_CLIENT")
+        print "TEST_POST_BLOCK_BIG_CLIENT"
         path = "/big"
         req = Request()
 
@@ -1538,7 +1538,7 @@ class Tests(unittest.TestCase):
         self._test_with_client([exchange1])
 
     def test_observe_client(self):
-        print("TEST_OBSERVE_CLIENT")
+        print "TEST_OBSERVE_CLIENT"
         path = "/basic"
 
         req = Request()

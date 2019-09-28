@@ -113,8 +113,6 @@ class Resource(object):
 
         :param etag: the ETag
         """
-        if not isinstance(etag, bytes):
-            etag = bytes(etag, "utf-8")
         self._etag.append(etag)
 
     @property
@@ -179,7 +177,7 @@ class Resource(object):
             if defines.Content_types["text/plain"] in self._payload:
                 return self._payload[defines.Content_types["text/plain"]]
             else:
-                val = list(self._payload.keys())
+                val = self._payload.keys()
                 return val[0], self._payload[val[0]]
 
     @payload.setter
@@ -444,6 +442,14 @@ class Resource(object):
         """
         raise NotImplementedError
 
+    def render_FETCH(self, request):
+
+        raise NotImplementedError
+
+    def render_PATCH(self, request):
+
+        raise NotImplementedError
+
     def render_GET_advanced(self, request, response):
         """
         Method to be redefined to render a GET request on the resource.
@@ -456,7 +462,7 @@ class Resource(object):
 
     def render_PUT(self, request):
         """
-        Method to be redefined to render a PUTT request on the resource.
+        Method to be redefined to render a PUT request on the resource.
 
         :param request: the request
         :return: the resource
@@ -465,7 +471,7 @@ class Resource(object):
 
     def render_PUT_advanced(self, request, response):
         """
-        Method to be redefined to render a PUTT request on the resource.
+        Method to be redefined to render a PUT request on the resource.
 
         :param response: the partially filled response
         :param request: the request

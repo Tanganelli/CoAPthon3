@@ -1,4 +1,4 @@
-from queue import Queue
+from Queue import Queue
 import random
 import socket
 import threading
@@ -76,11 +76,11 @@ class Tests(unittest.TestCase):
         client.stop()
 
     def client_callback(self, response):
-        print("Callback")
+        print "Callback"
         self.queue.put(response)
 
     def test_get_multiple(self):
-        print("TEST_GET_MULTIPLE")
+        print "TEST_GET_MULTIPLE"
         path = "/basic"
         req = Request()
         req.code = defines.Codes.GET.number
@@ -123,7 +123,7 @@ class Tests(unittest.TestCase):
         self._test_with_client_delayed([exchange1, exchange2])
 
     def test_get_post(self):
-        print("TEST_GET_POST")
+        print "TEST_GET_POST"
         path = "/basic"
         req = Request()
         req.code = defines.Codes.POST.number
@@ -209,7 +209,7 @@ class Tests(unittest.TestCase):
         self._test_with_client_delayed([exchange1, exchange2, exchange3, exchange4])
 
     def test_get_put(self):
-        print("TEST_GET_PUT")
+        print "TEST_GET_PUT"
         path = "/basic"
         req = Request()
         req.code = defines.Codes.POST.number
@@ -295,7 +295,7 @@ class Tests(unittest.TestCase):
         self._test_with_client_delayed([exchange1, exchange2, exchange3, exchange4])
 
     def test_get_delete(self):
-        print("TEST_GET_DELETE")
+        print "TEST_GET_DELETE"
         path = "/basic"
 
         req2 = Request()
@@ -399,7 +399,7 @@ class Tests(unittest.TestCase):
         self._test_with_client_delayed([exchange0, exchange1, exchange2, exchange3, exchange4])
 
     def test_get_etag(self):
-        print("TEST_GET_ETAG")
+        print "TEST_GET_ETAG"
         path = "/etag"
         req = Request()
         req.code = defines.Codes.GET.number

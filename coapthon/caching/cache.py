@@ -2,7 +2,7 @@ import time
 
 import logging
 
-from .coaplrucache import CoapLRUCache
+from coaplrucache import CoapLRUCache
 from coapthon import utils
 from coapthon.messages.request import *
 
@@ -75,7 +75,7 @@ class Cache(object):
         extracting everything from the cache
         """
         result = []
-        items = list(self.cache.cache.items())
+        items = self.cache.cache.items()
 
         for key, item in items:
             element = self.cache.get(item.key)

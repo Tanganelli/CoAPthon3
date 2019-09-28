@@ -36,6 +36,38 @@ MAX_NON_NOTIFICATIONS = 10
 
 BLOCKWISE_SIZE = 1024
 
+""" Resource Directory parameters"""
+
+RD_HOST = "127.0.0.1"
+
+RD_PORT = 5680
+
+""" Serial communication parameters"""
+
+SERIAL_PORT = "/dev/ttyUSB0"
+
+SERIAL_BAUDRATE = 115200
+
+""" JSON configuration paths"""
+
+SERIAL_PARAMETER_SCHEMA_PATH = "serialparameterschema.json"
+
+NODE_RESOURCE_SCHEMA_PATH = "noderesourceschema.json"
+
+""" MongoDB parameters """
+
+MONGO_HOST = "127.0.0.1"
+
+MONGO_PORT = 27017
+
+MONGO_DATABASE = "rd"
+
+MONGO_USER = "RD"
+
+MONGO_PWD = "res-dir"
+
+MONGO_CONFIG_FILE = "etc/mongod.conf"
+
 """  Message Format """
 
 # number of bits used for the encoding of the CoAP version field.
@@ -112,7 +144,7 @@ class OptionRegistry(object):
     IF_MATCH =      OptionItem(1, "If-Match",       OPAQUE,  True, None)
     URI_HOST =      OptionItem(3, "Uri-Host",       STRING,  True, None)
     ETAG =          OptionItem(4, "ETag",           OPAQUE,  True, None)
-    IF_NONE_MATCH = OptionItem(5, "If-None-Match",  OPAQUE, False, None)
+    IF_NONE_MATCH = OptionItem(5, "If-None-Match",  INTEGER, False, None)
     OBSERVE =       OptionItem(6, "Observe",        INTEGER, False, 0)
     URI_PORT =      OptionItem(7, "Uri-Port",       INTEGER, False, 5683)
     LOCATION_PATH = OptionItem(8, "Location-Path",  STRING,  True, None)
@@ -127,7 +159,6 @@ class OptionRegistry(object):
     PROXY_URI =     OptionItem(35, "Proxy-Uri",     STRING,  False, None)
     PROXY_SCHEME =  OptionItem(39, "Proxy-Schema",  STRING,  False, None)
     SIZE1 =         OptionItem(60, "Size1",         INTEGER, False, None)
-    NO_RESPONSE =   OptionItem(258, "No-Response",  INTEGER, False, None)
     RM_MESSAGE_SWITCHING = OptionItem(65524, "Routing", OPAQUE, False, None)
 
     LIST = {
@@ -150,7 +181,6 @@ class OptionRegistry(object):
         35: PROXY_URI,
         39: PROXY_SCHEME,
         60: SIZE1,
-        258: NO_RESPONSE,
         65524: RM_MESSAGE_SWITCHING
 
     }
@@ -192,6 +222,7 @@ class Codes(object):
     """
     CoAP codes. Every code is represented as (NUMBER, NAME)
     """
+
     ERROR_LOWER_BOUND = 128
 
     EMPTY = CodeItem(0, 'EMPTY')
@@ -199,6 +230,8 @@ class Codes(object):
     POST = CodeItem(2, 'POST')
     PUT = CodeItem(3, 'PUT')
     DELETE = CodeItem(4, 'DELETE')
+    FETCH = CodeItem(5, 'FETCH')
+    PATCH = CodeItem(6, 'PATCH')
 
     CREATED = CodeItem(65, 'CREATED')
     DELETED = CodeItem(66, 'DELETED')
@@ -230,9 +263,11 @@ class Codes(object):
         2: POST,
         3: PUT,
         4: DELETE,
+        5: FETCH,
+        6: PATCH,
 
         65: CREATED,
-        66: DELETE,
+        66: DELETED,
         67: VALID,
         68: CHANGED,
         69: CONTENT,
@@ -265,7 +300,9 @@ Content_types = {
     "application/octet-stream": 42,
     "application/exi": 47,
     "application/json": 50,
-    "application/cbor": 60
+    "application/cbor": 60,
+    "application/map-keys+json": 12000,
+    "application/json-patch+json": 12100
 }
 
 COAP_PREFACE = "coap://"
@@ -273,6 +310,7 @@ LOCALHOST = "127.0.0.1"
 HC_PROXY_DEFAULT_PORT = 8080  # TODO there is a standard for this?
 COAP_DEFAULT_PORT = 5683
 DEFAULT_HC_PATH = "/"
+DEFAULT_CH_PATH = "/coap2http"
 BAD_REQUEST = 400  # "Bad Request" error code
 NOT_IMPLEMENTED = 501  # "Not Implemented" error code
 

@@ -17,12 +17,15 @@ from coapthon.messages.message import Message
 from coapthon.messages.request import Request
 from coapthon.resources.resource import Resource
 from coapthon.serializer import Serializer
-from coapthon.utils import Tree
+from coapthon.utils import Tree, create_logging
 
 __author__ = 'Giacomo Tanganelli'
 
+if not os.path.isfile("logging.conf"):
+    create_logging()
 
 logger = logging.getLogger(__name__)
+logging.config.fileConfig("logging.conf", disable_existing_loggers=False)
 
 
 class CoAP(object):
@@ -271,7 +274,6 @@ class CoAP(object):
             host, port = message.destination
             logger.debug("send_datagram - " + str(message))
             serializer = Serializer()
-
             message = serializer.serialize(message)
 
             self._socket.sendto(message, (host, port))

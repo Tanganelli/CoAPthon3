@@ -60,7 +60,7 @@ class CoapLRUCache(CoapCache):
 
     def __str__(self):
         msg = []
-        for e in list(self.cache.values()):
+        for e in self.cache.values():
             msg.append(str(e))
         return "Cache Size: {sz}\n" + "\n".join(msg)
 

@@ -14,13 +14,17 @@ from coapthon.messages.message import Message
 from coapthon.messages.request import Request
 from coapthon.messages.response import Response
 from coapthon.serializer import Serializer
-import collections
+from coapthon.utils import create_logging
 
 
 __author__ = 'Giacomo Tanganelli'
 
 
+if not os.path.isfile("logging.conf"):
+    create_logging()
+
 logger = logging.getLogger(__name__)
+logging.config.fileConfig("logging.conf", disable_existing_loggers=False)
 
 
 class CoAP(object):
@@ -76,6 +80,12 @@ class CoAP(object):
             event.set()
         if self._receiver_thread is not None:
             self._receiver_thread.join()
+        try:
+            # Python does not close the OS FD on socket.close()
+            # Ensure OS socket is closed with shutdown to prevent FD leak
+            self._socket.shutdown(socket.SHUT_RDWR)
+        except socket.error:
+            pass
         self._socket.close()
 
     @property
@@ -115,6 +125,17 @@ class CoAP(object):
             message = self._observeLayer.send_empty(message)
             message = self._messageLayer.send_empty(None, None, message)
             self.send_datagram(message)
+
+    def end_observation(self, token):
+        """
+        Remove an observation token from our records.
+
+        :param token: the token for the observation
+        """
+        dummy = Message()
+        dummy.token = token
+        dummy.destination = self._server
+        self._observeLayer.remove_subscriber(dummy)
 
     @staticmethod
     def _wait_for_retransmit_thread(transaction):
@@ -156,20 +177,12 @@ class CoAP(object):
         try:
             self._socket.sendto(raw_message, (host, port))
         except Exception as e:
-            if self._cb_ignore_write_exception is not None and isinstance(self._cb_ignore_write_exception, collections.Callable):
+            if self._cb_ignore_write_exception is not None and callable(self._cb_ignore_write_exception):
                 if not self._cb_ignore_write_exception(e, self):
                     raise
 
-        # if you're explicitly setting that you don't want a response, don't wait for it
-        # https://tools.ietf.org/html/rfc7967#section-2.1
-        for opt in message.options:
-            if opt.number == defines.OptionRegistry.NO_RESPONSE.number:
-                if opt.value == 26:
-                    return
-
         if self._receiver_thread is None or not self._receiver_thread.isAlive():
             self._receiver_thread = threading.Thread(target=self.receive_datagram)
-            self._receiver_thread.daemon = True
             self._receiver_thread.start()
 
     def _start_retransmission(self, transaction, message):
@@ -220,7 +233,7 @@ class CoAP(object):
                 message.timeouted = True
 
                 # Inform the user, that nothing was received
-                self._callback(None)
+                self._callback(message)
 
             try:
                 self.to_be_stopped.remove(transaction.retransmit_stop)
@@ -243,7 +256,7 @@ class CoAP(object):
             except socket.timeout:  # pragma: no cover
                 continue
             except Exception as e:  # pragma: no cover
-                if self._cb_ignore_read_exception is not None and isinstance(self._cb_ignore_read_exception, collections.Callable):
+                if self._cb_ignore_read_exception is not None and callable(self._cb_ignore_read_exception):
                     if self._cb_ignore_read_exception(e, self):
                         continue
                 return

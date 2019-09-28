@@ -21,12 +21,16 @@ from coapthon.messages.request import Request
 from coapthon.resources.remoteResource import RemoteResource
 from coapthon.resources.resource import Resource
 from coapthon.serializer import Serializer
-from coapthon.utils import Tree
+from coapthon.utils import Tree, create_logging
 
 __author__ = 'Giacomo Tanganelli'
 
 
+if not os.path.isfile("logging.conf"):
+    create_logging()
+
 logger = logging.getLogger(__name__)
+logging.config.fileConfig("logging.conf", disable_existing_loggers=False)
 
 
 class CoAP(object):

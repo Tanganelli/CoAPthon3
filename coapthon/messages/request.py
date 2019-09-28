@@ -116,7 +116,7 @@ class Request(Message):
 
         :param value: the Accept value
         """
-        if value in list(defines.Content_types.values()):
+        if value in defines.Content_types.values():
             option = Option()
             option.number = defines.OptionRegistry.ACCEPT.number
             option.value = value
@@ -185,16 +185,6 @@ class Request(Message):
         option = Option()
         option.number = defines.OptionRegistry.IF_NONE_MATCH.number
         option.value = None
-        self.add_option(option)
-
-    def add_no_response(self):
-        """
-        Add the no-response option to the request
-        # https://tools.ietf.org/html/rfc7967#section-2.1
-        """
-        option = Option()
-        option.number = defines.OptionRegistry.NO_RESPONSE.number
-        option.value = 26
         self.add_option(option)
 
     @if_none_match.deleter

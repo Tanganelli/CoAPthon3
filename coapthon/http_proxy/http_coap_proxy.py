@@ -1,13 +1,13 @@
 import argparse
 import logging
 
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from coapthon.client.helperclient import HelperClient
 from coapthon.utils import parse_uri
 from coapthon.defines import Codes, DEFAULT_HC_PATH, HC_PROXY_DEFAULT_PORT, COAP_DEFAULT_PORT, LOCALHOST, BAD_REQUEST, \
     NOT_IMPLEMENTED, CoAP_HTTP
 from coapthon.defines import COAP_PREFACE
-from urllib.parse import urlparse
+from urlparse import urlparse
 
 __author__ = "Marco Ieni, Davide Foti"
 __email__ = "marcoieni94@gmail.com, davidefoti.uni@gmail.com"

@@ -1,6 +1,6 @@
 import threading
 import unittest
-from queue import Queue
+from Queue import Queue
 import random
 
 from coapserver import CoAPServer
@@ -55,11 +55,11 @@ class Tests(unittest.TestCase):
         client.stop()
 
     def client_callback(self, response):
-        print("Callback")
+        print "Callback"
         self.queue.put(response)
 
     def test_advanced(self):
-        print("TEST_ADVANCED")
+        print "TEST_ADVANCED"
         path = "/advanced"
         req = Request()
         req.code = defines.Codes.GET.number
@@ -135,7 +135,7 @@ class Tests(unittest.TestCase):
         self._test_with_client([exchange1, exchange2, exchange3, exchange4])
 
     def test_advanced_separate(self):
-        print("TEST_ADVANCED_SEPARATE")
+        print "TEST_ADVANCED_SEPARATE"
         path = "/advancedSeparate"
         req = Request()
         req.code = defines.Codes.GET.number
