@@ -378,10 +378,11 @@ class CoAP(object):
 
         ack = Message()
         ack.type = defines.Types['ACK']
-        # TODO handle mutex on transaction
-        if not transaction.request.acknowledged and transaction.request.type == defines.Types["CON"]:
-            ack = self._messageLayer.send_empty(transaction, transaction.request, ack)
-            self.send_datagram(ack)
+        with transaction:
+            if not transaction.request.acknowledged and transaction.request.type == defines.Types["CON"]:
+                ack = self._messageLayer.send_empty(transaction, transaction.request, ack)
+                if ack.type is not None and ack.mid is not None:
+                    self.send_datagram(ack)
 
     def notify(self, resource):
         """
