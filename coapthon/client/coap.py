@@ -239,7 +239,7 @@ class CoAP(object):
         while not self.stopped.isSet():
             self._socket.settimeout(0.1)
             try:
-                datagram, addr = self._socket.recvfrom(1152)
+                datagram, addr = self._socket.recvfrom(1500)
             except socket.timeout:  # pragma: no cover
                 continue
             except Exception as e:  # pragma: no cover
