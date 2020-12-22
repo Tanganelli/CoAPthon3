@@ -642,6 +642,38 @@ class Message(object):
         self.del_option_by_number(defines.OptionRegistry.BLOCK2.number)
 
     @property
+    def size2(self):
+        """
+        Get the Size2 option.
+
+        :return: the Size2 value
+        """
+        value = None
+        for option in self.options:
+            if option.number == defines.OptionRegistry.SIZE2.number:
+                value = option.value
+        return value
+
+    @size2.setter
+    def size2(self, value):
+        """
+        Set the Size2 option.
+
+        :param value: the Block2 value
+        """
+        option = Option()
+        option.number = defines.OptionRegistry.SIZE2.number
+        option.value = value
+        self.add_option(option)
+
+    @size2.deleter
+    def size2(self):
+        """
+        Delete the Size2 option.
+        """
+        self.del_option_by_number(defines.OptionRegistry.SIZE2.number)
+
+    @property
     def line_print(self):
         """
         Return the message as a one-line string.
