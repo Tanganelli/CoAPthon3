@@ -115,15 +115,15 @@ class Message(object):
         """
         Set the Token of the message.
 
-        :type value: String
+        :type value: Bytes
         :param value: the Token
         :raise AttributeError: if value is longer than 256
         """
         if value is None:
             self._token = value
             return
-        if not isinstance(value, str):
-            value = str(value)
+        if not isinstance(value, bytes):
+            value = bytes(value)
         if len(value) > 256:
             raise AttributeError
         self._token = value
