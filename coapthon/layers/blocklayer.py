@@ -60,7 +60,7 @@ class BlockLayer(object):
                 del transaction.request.block2
             else:
                 # early negotiation
-                byte = 0
+                byte = num * size
                 self._block2_receive[key_token] = BlockItem(byte, num, m, size)
                 del transaction.request.block2
 
