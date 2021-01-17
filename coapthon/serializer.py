@@ -157,10 +157,8 @@ class Serializer(object):
         values = [tmp, message.code, message.mid]
 
         if message.token is not None and tkl > 0:
-
-            for b in message.token:
-                fmt += "B"
-                values.append(b)
+            fmt += "%ss" % tkl
+            values.append(message.token)
 
         options = Serializer.as_sorted_list(message.options)  # already sorted
         lastoptionnumber = 0
