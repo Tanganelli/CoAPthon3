@@ -1,9 +1,9 @@
-import logging.config
-import os
+import logging
 import random
 import socket
 import struct
 import threading
+import collections
 
 from coapthon import defines
 from coapthon.layers.blocklayer import BlockLayer
@@ -16,18 +16,13 @@ from coapthon.messages.request import Request
 from coapthon.messages.response import Response
 from coapthon.resources.resource import Resource
 from coapthon.serializer import Serializer
-from coapthon.utils import Tree, create_logging
-import collections
+from coapthon.utils import Tree
 
 
 __author__ = 'Giacomo Tanganelli'
 
 
-if not os.path.isfile("logging.conf"):
-    create_logging()
-
 logger = logging.getLogger(__name__)
-logging.config.fileConfig("logging.conf", disable_existing_loggers=False)
 
 
 class CoAP(object):
@@ -88,20 +83,21 @@ class CoAP(object):
                 mreq = struct.pack("4sl", socket.inet_aton(defines.ALL_COAP_NODES), socket.INADDR_ANY)
                 self._socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
             else:
+                # Bugfix for Python 3.6 for Windows ... missing IPPROTO_IPV6 constant
+                if not hasattr(socket, 'IPPROTO_IPV6'):
+                    socket.IPPROTO_IPV6 = 41
+
                 self._socket = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 
                 # Allow multiple copies of this program on one machine
                 # (not strictly needed)
                 self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self._socket.bind((defines.ALL_COAP_NODES_IPV6, self.server_address[1]))
+                self._socket.bind(('', self.server_address[1]))
 
                 addrinfo_multicast = socket.getaddrinfo(defines.ALL_COAP_NODES_IPV6, 5683)[0]
                 group_bin = socket.inet_pton(socket.AF_INET6, addrinfo_multicast[4][0])
                 mreq = group_bin + struct.pack('@I', 0)
                 self._socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_JOIN_GROUP, mreq)
-                self._unicast_socket = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
-                self._unicast_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self._unicast_socket.bind(self.server_address)
         else:
             if addrinfo[0] == socket.AF_INET:  # IPv4
                 self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -154,7 +150,7 @@ class CoAP(object):
                     self.send_datagram(rst)
                     continue
 
-                logger.debug("receive_datagram - " + str(message))
+                logger.info("receive_datagram - " + str(message))
                 if isinstance(message, Request):
                     transaction = self._messageLayer.receive_request(message)
                     if transaction.request.duplicated and transaction.completed:
@@ -246,7 +242,7 @@ class CoAP(object):
         """
         if not self.stopped.isSet():
             host, port = message.destination
-            logger.debug("send_datagram - " + str(message))
+            logger.info("send_datagram - " + str(message))
             serializer = Serializer()
             message = serializer.serialize(message)
             self._socket.sendto(message, (host, port))
@@ -382,10 +378,11 @@ class CoAP(object):
 
         ack = Message()
         ack.type = defines.Types['ACK']
-        # TODO handle mutex on transaction
-        if not transaction.request.acknowledged and transaction.request.type == defines.Types["CON"]:
-            ack = self._messageLayer.send_empty(transaction, transaction.request, ack)
-            self.send_datagram(ack)
+        with transaction:
+            if not transaction.request.acknowledged and transaction.request.type == defines.Types["CON"]:
+                ack = self._messageLayer.send_empty(transaction, transaction.request, ack)
+                if ack.type is not None and ack.mid is not None:
+                    self.send_datagram(ack)
 
     def notify(self, resource):
         """

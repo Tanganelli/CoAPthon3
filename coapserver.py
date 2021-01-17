@@ -26,8 +26,8 @@ class CoAPServer(CoAP):
         self.add_resource('advanced/', AdvancedResource())
         self.add_resource('advancedSeparate/', AdvancedResourceSeparate())
 
-        print(("CoAP Server start on " + host + ":" + str(port)))
-        print((self.root.dump()))
+        print("CoAP Server start on " + host + ":" + str(port))
+        print(self.root.dump())
 
 
 def usage():  # pragma: no cover

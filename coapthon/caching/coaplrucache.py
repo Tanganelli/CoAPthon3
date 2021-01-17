@@ -23,8 +23,7 @@ class CoapLRUCache(CoapCache):
         :param element:
         :return:
         """
-        logger.debug("updating cache, key: %s, element: %s", \
-                key.hashkey, element)
+        logger.debug("updating cache, key: %s, element: %s", key.hashkey, element)
         self.cache.update([(key.hashkey, element)])
 
     def get(self, key):

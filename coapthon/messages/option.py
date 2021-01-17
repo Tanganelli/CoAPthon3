@@ -42,7 +42,7 @@ class Option(object):
         :return: the option value in the correct format depending on the option
         """
         if type(self._value) is None:
-            self._value = bytearray()
+            self._value = bytes()
         opt_type = defines.OptionRegistry.LIST[self._number].value_type
         if opt_type == defines.INTEGER:
             if byte_len(self._value) > 0:
@@ -73,7 +73,6 @@ class Option(object):
             else:
                 if value is not None:
                     value = bytes(value, "utf-8")
-
         self._value = value
 
     @property

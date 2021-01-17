@@ -1,6 +1,9 @@
 import logging
 import random
 import time
+import socket
+
+from coapthon import utils
 from coapthon.messages.message import Message
 from coapthon import defines
 from coapthon.messages.request import Request
@@ -9,15 +12,6 @@ from coapthon.transaction import Transaction
 __author__ = 'Giacomo Tanganelli'
 
 logger = logging.getLogger(__name__)
-
-
-def str_append_hash(*args):
-    """ Convert each argument to a lower case string, appended, then hash """
-    ret_hash = ""
-    for i in args:
-        ret_hash += str(i).lower()
-
-    return hash(ret_hash)
 
 
 class MessageLayer(object):
@@ -48,17 +42,17 @@ class MessageLayer(object):
         self._current_mid %= 65535
         return current_mid
 
-    def purge(self):
+    def purge(self, timeout_time=defines.EXCHANGE_LIFETIME):
         for k in list(self._transactions.keys()):
             now = time.time()
             transaction = self._transactions[k]
-            if transaction.timestamp + defines.EXCHANGE_LIFETIME < now:
+            if transaction.timestamp + timeout_time < now:
                 logger.debug("Delete transaction")
                 del self._transactions[k]
         for k in list(self._transactions_token.keys()):
             now = time.time()
             transaction = self._transactions_token[k]
-            if transaction.timestamp + defines.EXCHANGE_LIFETIME < now:
+            if transaction.timestamp + timeout_time < now:
                 logger.debug("Delete transaction")
                 del self._transactions_token[k]
 
@@ -71,13 +65,13 @@ class MessageLayer(object):
         :rtype : Transaction
         :return: the edited transaction
         """
-        logger.debug("receive_request - " + str(request))
+        logger.info("receive_request - " + str(request))
         try:
             host, port = request.source
         except AttributeError:
             return
-        key_mid = str_append_hash(host, port, request.mid)
-        key_token = str_append_hash(host, port, request.token)
+        key_mid = utils.str_append_hash(host, port, request.mid)
+        key_token = utils.str_append_hash(host, port, request.token)
 
         if key_mid in list(self._transactions.keys()):
             # Duplicated
@@ -100,15 +94,16 @@ class MessageLayer(object):
         :rtype : Transaction
         :return: the transaction to which the response belongs to
         """
-        logger.debug("receive_response - " + str(response))
+        logger.info("receive_response - " + str(response))
         try:
             host, port = response.source
         except AttributeError:
             return
-        key_mid = str_append_hash(host, port, response.mid)
-        key_mid_multicast = str_append_hash(defines.ALL_COAP_NODES, port, response.mid)
-        key_token = str_append_hash(host, port, response.token)
-        key_token_multicast = str_append_hash(defines.ALL_COAP_NODES, port, response.token)
+        all_coap_nodes = defines.ALL_COAP_NODES_IPV6 if socket.getaddrinfo(host, None)[0][0] == socket.AF_INET6 else defines.ALL_COAP_NODES
+        key_mid = utils.str_append_hash(host, port, response.mid)
+        key_mid_multicast = utils.str_append_hash(all_coap_nodes, port, response.mid)
+        key_token = utils.str_append_hash(host, port, response.token)
+        key_token_multicast = utils.str_append_hash(all_coap_nodes, port, response.token)
         if key_mid in list(self._transactions.keys()):
             transaction = self._transactions[key_mid]
             if response.token != transaction.request.token:
@@ -146,15 +141,16 @@ class MessageLayer(object):
         :rtype : Transaction
         :return: the transaction to which the message belongs to
         """
-        logger.debug("receive_empty - " + str(message))
+        logger.info("receive_empty - " + str(message))
         try:
             host, port = message.source
         except AttributeError:
             return
-        key_mid = str_append_hash(host, port, message.mid)
-        key_mid_multicast = str_append_hash(defines.ALL_COAP_NODES, port, message.mid)
-        key_token = str_append_hash(host, port, message.token)
-        key_token_multicast = str_append_hash(defines.ALL_COAP_NODES, port, message.token)
+        all_coap_nodes = defines.ALL_COAP_NODES_IPV6 if socket.getaddrinfo(host, None)[0][0] == socket.AF_INET6 else defines.ALL_COAP_NODES
+        key_mid = utils.str_append_hash(host, port, message.mid)
+        key_mid_multicast = utils.str_append_hash(all_coap_nodes, port, message.mid)
+        key_token = utils.str_append_hash(host, port, message.token)
+        key_token_multicast = utils.str_append_hash(all_coap_nodes, port, message.token)
         if key_mid in list(self._transactions.keys()):
             transaction = self._transactions[key_mid]
         elif key_token in self._transactions_token:
@@ -198,7 +194,7 @@ class MessageLayer(object):
         :rtype : Transaction
         :return: the created transaction
         """
-        logger.debug("send_request - " + str(request))
+        logger.info("send_request - " + str(request))
         assert isinstance(request, Request)
         try:
             host, port = request.destination
@@ -213,10 +209,10 @@ class MessageLayer(object):
         if transaction.request.mid is None:
             transaction.request.mid = self.fetch_mid()
 
-        key_mid = str_append_hash(host, port, request.mid)
+        key_mid = utils.str_append_hash(host, port, request.mid)
         self._transactions[key_mid] = transaction
 
-        key_token = str_append_hash(host, port, request.token)
+        key_token = utils.str_append_hash(host, port, request.token)
         self._transactions_token[key_token] = transaction
 
         return self._transactions[key_mid]
@@ -230,7 +226,7 @@ class MessageLayer(object):
         :rtype : Transaction
         :return: the edited transaction
         """
-        logger.debug("send_response - " + str(transaction.response))
+        logger.info("send_response - " + str(transaction.response))
         if transaction.response.type is None:
             if transaction.request.type == defines.Types["CON"] and not transaction.request.acknowledged:
                 transaction.response.type = defines.Types["ACK"]
@@ -249,7 +245,7 @@ class MessageLayer(object):
                 host, port = transaction.response.destination
             except AttributeError:
                 return
-            key_mid = str_append_hash(host, port, transaction.response.mid)
+            key_mid = utils.str_append_hash(host, port, transaction.response.mid)
             self._transactions[key_mid] = transaction
 
         transaction.request.acknowledged = True
@@ -265,14 +261,14 @@ class MessageLayer(object):
         :type message: Message
         :param message: the ACK or RST message to send
         """
-        logger.debug("send_empty - " + str(message))
+        logger.info("send_empty - " + str(message))
         if transaction is None:
             try:
                 host, port = message.destination
             except AttributeError:
                 return
-            key_mid = str_append_hash(host, port, message.mid)
-            key_token = str_append_hash(host, port, message.token)
+            key_mid = utils.str_append_hash(host, port, message.mid)
+            key_token = utils.str_append_hash(host, port, message.token)
             if key_mid in self._transactions:
                 transaction = self._transactions[key_mid]
                 related = transaction.response

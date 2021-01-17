@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import threading
 import unittest
 from queue import Queue
@@ -18,7 +20,7 @@ class Tests(unittest.TestCase):
         self.current_mid = random.randint(1, 1000)
         self.server_mid = random.randint(1000, 2000)
         self.server = CoAPServer("127.0.0.1", 5683)
-        self.server_thread = threading.Thread(target=self.server.listen, args=(10,))
+        self.server_thread = threading.Thread(target=self.server.listen, args=(1,))
         self.server_thread.start()
         self.queue = Queue()
 
@@ -61,6 +63,7 @@ class Tests(unittest.TestCase):
     def test_advanced(self):
         print("TEST_ADVANCED")
         path = "/advanced"
+
         req = Request()
         req.code = defines.Codes.GET.number
         req.uri_path = path
@@ -76,7 +79,6 @@ class Tests(unittest.TestCase):
         expected.token = None
 
         exchange1 = (req, expected)
-
         self.current_mid += 1
 
         req = Request()
@@ -94,7 +96,6 @@ class Tests(unittest.TestCase):
         expected.token = None
 
         exchange2 = (req, expected)
-
         self.current_mid += 1
 
         req = Request()
@@ -112,7 +113,6 @@ class Tests(unittest.TestCase):
         expected.token = None
 
         exchange3 = (req, expected)
-
         self.current_mid += 1
 
         req = Request()
@@ -130,13 +130,14 @@ class Tests(unittest.TestCase):
         expected.token = None
 
         exchange4 = (req, expected)
-
         self.current_mid += 1
+
         self._test_with_client([exchange1, exchange2, exchange3, exchange4])
 
     def test_advanced_separate(self):
         print("TEST_ADVANCED_SEPARATE")
         path = "/advancedSeparate"
+
         req = Request()
         req.code = defines.Codes.GET.number
         req.uri_path = path
@@ -152,7 +153,6 @@ class Tests(unittest.TestCase):
         expected.token = None
 
         exchange1 = (req, expected)
-
         self.current_mid += 1
 
         req = Request()
@@ -170,7 +170,6 @@ class Tests(unittest.TestCase):
         expected.token = None
 
         exchange2 = (req, expected)
-
         self.current_mid += 1
 
         req = Request()
@@ -188,7 +187,6 @@ class Tests(unittest.TestCase):
         expected.token = None
 
         exchange3 = (req, expected)
-
         self.current_mid += 1
 
         req = Request()
@@ -206,9 +204,10 @@ class Tests(unittest.TestCase):
         expected.token = None
 
         exchange4 = (req, expected)
-
         self.current_mid += 1
+
         self._test_with_client([exchange1, exchange2, exchange3, exchange4])
+
 
 if __name__ == '__main__':
     unittest.main()

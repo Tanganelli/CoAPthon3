@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+
 from queue import Queue
 import random
 import socket
 import threading
 import unittest
+
 from coapthon.messages.message import Message
 from coapclient import HelperClient
 from coapthon.messages.response import Response
@@ -23,7 +25,7 @@ class Tests(unittest.TestCase):
         self.current_mid = random.randint(1, 1000)
         self.server_mid = random.randint(1000, 2000)
         self.server = CoAPServerPlugTest("127.0.0.1", 5683, starting_mid=self.server_mid)
-        self.server_thread = threading.Thread(target=self.server.listen, args=(10,))
+        self.server_thread = threading.Thread(target=self.server.listen, args=(1,))
         self.server_thread.start()
         self.queue = Queue()
 
@@ -127,6 +129,7 @@ class Tests(unittest.TestCase):
     def test_td_coap_link_01(self):
         print("TD_COAP_LINK_01")
         path = "/.well-known/core"
+
         req = Request()
         req.code = defines.Codes.GET.number
         req.uri_path = path
@@ -147,6 +150,7 @@ class Tests(unittest.TestCase):
     def test_td_coap_link_02(self):
         print("TD_COAP_LINK_02")
         path = "/.well-known/core"
+
         req = Request()
         req.code = defines.Codes.GET.number
         req.uri_path = path
@@ -168,6 +172,7 @@ class Tests(unittest.TestCase):
     def test_td_coap_core_01(self):
         print("TD_COAP_CORE_01")
         path = "/test"
+
         req = Request()
         req.code = defines.Codes.GET.number
         req.uri_path = path
@@ -188,8 +193,8 @@ class Tests(unittest.TestCase):
     def test_td_coap_core_02(self):
         print("TD_COAP_CORE_02")
         path = "/test_post"
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.POST.number
         req.uri_path = path
         req.type = defines.Types["CON"]
@@ -204,7 +209,7 @@ class Tests(unittest.TestCase):
         expected.code = defines.Codes.CREATED.number
         expected.token = None
         expected.payload = None
-        expected.location_path = "/test_post"
+        expected.location_path = "test_post"
 
         self.current_mid += 1
         self._test_with_client([(req, expected)])
@@ -212,8 +217,8 @@ class Tests(unittest.TestCase):
     def test_td_coap_core_03(self):
         print("TD_COAP_CORE_03")
         path = "/test"
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.PUT.number
         req.uri_path = path
         req.type = defines.Types["CON"]
@@ -233,7 +238,6 @@ class Tests(unittest.TestCase):
         exchange1 = (req, expected)
 
         req = Request()
-
         req.code = defines.Codes.GET.number
         req.uri_path = path
         req.type = defines.Types["CON"]
@@ -251,7 +255,6 @@ class Tests(unittest.TestCase):
         exchange2 = (req, expected)
 
         req = Request()
-
         req.code = defines.Codes.GET.number
         req.uri_path = path
         req.type = defines.Types["CON"]
@@ -274,8 +277,8 @@ class Tests(unittest.TestCase):
     def test_td_coap_core_04(self):
         print("TD_COAP_CORE_04")
         path = "/test"
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.DELETE.number
         req.uri_path = path
         req.type = defines.Types["CON"]
@@ -295,8 +298,8 @@ class Tests(unittest.TestCase):
     def test_td_coap_core_05(self):
         print("TD_COAP_CORE_05")
         path = "/test"
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.GET.number
         req.uri_path = path
         req.type = defines.Types["NON"]
@@ -316,8 +319,8 @@ class Tests(unittest.TestCase):
     def test_td_coap_core_06(self):
         print("TD_COAP_CORE_06")
         path = "/test_post"
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.POST.number
         req.uri_path = path
         req.type = defines.Types["NON"]
@@ -332,7 +335,7 @@ class Tests(unittest.TestCase):
         expected.code = defines.Codes.CREATED.number
         expected.token = None
         expected.payload = None
-        expected.location_path = "/test_post"
+        expected.location_path = "test_post"
 
         self.current_mid += 1
         self._test_with_client([(req, expected)])
@@ -340,8 +343,8 @@ class Tests(unittest.TestCase):
     def test_td_coap_core_07(self):
         print("TD_COAP_CORE_07")
         path = "/test"
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.PUT.number
         req.uri_path = path
         req.type = defines.Types["NON"]
@@ -363,8 +366,8 @@ class Tests(unittest.TestCase):
     def test_td_coap_core_08(self):
         print("TD_COAP_CORE_08")
         path = "/test"
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.DELETE.number
         req.uri_path = path
         req.type = defines.Types["NON"]
@@ -384,8 +387,8 @@ class Tests(unittest.TestCase):
     def test_td_coap_core_09(self):
         print("TD_COAP_CORE_09")
         path = "/separate"
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.GET.number
         req.uri_path = path
         req.type = defines.Types["CON"]
@@ -412,8 +415,8 @@ class Tests(unittest.TestCase):
     def test_td_coap_core_10(self):
         print("TD_COAP_CORE_10")
         path = "/test"
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.GET.number
         req.uri_path = path
         req.type = defines.Types["CON"]
@@ -435,8 +438,8 @@ class Tests(unittest.TestCase):
     def test_td_coap_core_12(self):
         print("TD_COAP_CORE_12")
         path = "/seg1/seg2/seg3"
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.GET.number
         req.uri_path = path
         req.type = defines.Types["CON"]
@@ -455,8 +458,8 @@ class Tests(unittest.TestCase):
     def test_td_coap_core_13(self):
         print("TD_COAP_CORE_13")
         path = "/query?first=1&second=2&third=3"
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.GET.number
         req.uri_path = path
         req.type = defines.Types["CON"]
@@ -476,8 +479,8 @@ class Tests(unittest.TestCase):
     def test_td_coap_obs_01(self):
         print("TD_COAP_OBS_01")
         path = "/obs"
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.GET.number
         req.uri_path = path
         req.type = defines.Types["CON"]
@@ -508,8 +511,8 @@ class Tests(unittest.TestCase):
     def test_td_coap_obs_03(self):
         print("TD_COAP_OBS_03")
         path = "/obs"
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.GET.number
         req.uri_path = path
         req.type = defines.Types["CON"]
@@ -566,6 +569,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (0, 1, 1024)
+        expected.size2 = 1990
 
         exchange1 = (req, expected)
         self.current_mid += 1
@@ -586,6 +590,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (1, 0, 1024)
+        expected.size2 = 1990
 
         exchange2 = (req, expected)
         self.current_mid += 1
@@ -632,6 +637,7 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
  when I first awoke, I could hardly tell it from the quilt, they so blended their hues together; and it was only by
  the sense of weight and pressure that I could tell that Queequeg was hugging"""
         expected.block2 = (1, 0, 1024)
+        expected.size2 = 1990
 
         exchange1 = (req, expected)
         self.current_mid += 1
@@ -677,6 +683,7 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
  when I first awoke, I could hardly tell it from the quilt, they so blended their hues together; and it was only by
  the sense of weight and pressure that I could tell that Queequeg was hugging"""
         expected.block2 = (1, 0, 1024)
+        expected.size2 = 1990
 
         exchange1 = (req, expected)
         self.current_mid += 1
@@ -702,6 +709,7 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
         expected.token = None
         expected.payload = None
         expected.block2 = (0, 1, 1024)
+        expected.size2 = 1990
 
         exchange1 = (req, expected)
         self.current_mid += 1
@@ -722,6 +730,7 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
         expected.token = None
         expected.payload = None
         expected.block2 = (1, 0, 1024)
+        expected.size2 = 1990
 
         exchange2 = (req, expected)
         self.current_mid += 1
@@ -796,6 +805,7 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
     def test_duplicate(self):
         print("TEST_DUPLICATE")
         path = "/test"
+
         req = Request()
         req.code = defines.Codes.GET.number
         req.uri_path = path
@@ -810,11 +820,13 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
         expected.token = None
 
         self.current_mid += 1
+
         self._test_plugtest([(req, expected), (req, expected)])
 
     def test_duplicate_not_completed(self):
         print("TEST_DUPLICATE_NOT_COMPLETED")
         path = "/long"
+
         req = Request()
         req.code = defines.Codes.GET.number
         req.uri_path = path
@@ -835,11 +847,13 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
         expected2.token = None
 
         self.current_mid += 1
+
         self._test_plugtest([(req, None), (req, expected), (None, expected2)])
 
     def test_no_response(self):
         print("TEST_NO_RESPONSE")
         path = "/long"
+
         req = Request()
         req.code = defines.Codes.GET.number
         req.uri_path = path
@@ -860,13 +874,14 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
         expected2.token = None
 
         self.current_mid += 1
+
         self._test_plugtest([(req, expected), (None, expected2), (None, expected2),  (None, expected2)])
 
     def test_edit_resource(self):
         print("TEST_EDIT_RESOURCE")
         path = "/obs"
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.POST.number
         req.uri_path = path
         req.type = defines.Types["CON"]
@@ -880,10 +895,11 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
         expected.code = defines.Codes.CHANGED.number
         expected.token = None
         expected.payload = None
-        expected.location_path = "/obs"
 
         self.current_mid += 1
+
         self._test_with_client([(req, expected)])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,9 +1,8 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
+
 import logging
 import threading
 import time
-
-import datetime
 
 from coapthon import defines
 from coapthon.resources.resource import Resource
