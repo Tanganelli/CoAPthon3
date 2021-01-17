@@ -1,10 +1,8 @@
-import logging.config
+import logging
 import random
 import socket
 import struct
 import threading
-
-import os
 
 from coapthon import defines
 from coapthon.layers.blocklayer import BlockLayer
@@ -88,27 +86,26 @@ class CoAP(object):
                 # Allow multiple copies of this program on one machine
                 # (not strictly needed)
                 self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self._socket.bind((defines.ALL_COAP_NODES, self.server_address[1]))
+                self._socket.bind(('', self.server_address[1]))
+
                 mreq = struct.pack("4sl", socket.inet_aton(defines.ALL_COAP_NODES), socket.INADDR_ANY)
                 self._socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
-                self._unicast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                self._unicast_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self._unicast_socket.bind(self.server_address)
             else:
+                # Bugfix for Python 3.6 for Windows ... missing IPPROTO_IPV6 constant
+                if not hasattr(socket, 'IPPROTO_IPV6'):
+                    socket.IPPROTO_IPV6 = 41
+
                 self._socket = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 
                 # Allow multiple copies of this program on one machine
                 # (not strictly needed)
                 self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self._socket.bind((defines.ALL_COAP_NODES_IPV6, self.server_address[1]))
+                self._socket.bind(('', self.server_address[1]))
 
                 addrinfo_multicast = socket.getaddrinfo(defines.ALL_COAP_NODES_IPV6, 5683)[0]
                 group_bin = socket.inet_pton(socket.AF_INET6, addrinfo_multicast[4][0])
                 mreq = group_bin + struct.pack('@I', 0)
                 self._socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_JOIN_GROUP, mreq)
-                self._unicast_socket = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
-                self._unicast_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self._unicast_socket.bind(self.server_address)
         else:
             if addrinfo[0] == socket.AF_INET: # IPv4
                 self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -140,7 +137,7 @@ class CoAP(object):
             except socket.timeout:
                 continue
             try:
-                #Start a new thread not to block other requests
+                # Start a new thread not to block other requests
                 args = ((data, client_address), )
                 t = threading.Thread(target=self.receive_datagram, args=args)
                 t.daemon = True
@@ -159,7 +156,7 @@ class CoAP(object):
         self.stopped.set()
         for event in self.to_be_stopped:
             event.set()
-        self._socket.close()
+        # self._socket.close()
 
     def receive_datagram(self, args):
         """
@@ -189,20 +186,20 @@ class CoAP(object):
             rst.code = message
             self.send_datagram(rst)
             return
-        logger.debug("receive_datagram - " + str(message))
+        logger.info("receive_datagram - " + str(message))
         if isinstance(message, Request):
 
             transaction = self._messageLayer.receive_request(message)
 
             if transaction.request.duplicated and transaction.completed:
-                logger.debug("message duplicated,transaction completed")
+                logger.debug("message duplicated, transaction completed")
                 transaction = self._observeLayer.send_response(transaction)
                 transaction = self._blockLayer.send_response(transaction)
                 transaction = self._messageLayer.send_response(transaction)
                 self.send_datagram(transaction.response)
                 return
             elif transaction.request.duplicated and not transaction.completed:
-                logger.debug("message duplicated,transaction NOT completed")
+                logger.debug("message duplicated, transaction NOT completed")
                 self._send_ack(transaction)
                 return
 
@@ -269,7 +266,7 @@ class CoAP(object):
         """
         if not self.stopped.isSet():
             host, port = message.destination
-            logger.debug("send_datagram - " + str(message))
+            logger.info("send_datagram - " + str(message))
             serializer = Serializer()
 
             message = serializer.serialize(message)

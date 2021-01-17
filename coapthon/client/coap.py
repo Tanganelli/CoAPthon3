@@ -1,9 +1,9 @@
-import logging.config
-import os
+import logging
 import random
 import socket
 import threading
 import time
+import collections
 
 from coapthon import defines
 from coapthon.layers.blocklayer import BlockLayer
@@ -14,7 +14,6 @@ from coapthon.messages.message import Message
 from coapthon.messages.request import Request
 from coapthon.messages.response import Response
 from coapthon.serializer import Serializer
-import collections
 
 
 __author__ = 'Giacomo Tanganelli'
@@ -66,6 +65,13 @@ class CoAP(object):
 
         self._receiver_thread = None
 
+    def purge_transactions(self, timeout_time=defines.EXCHANGE_LIFETIME):
+        """
+        Clean old transactions
+
+        """
+        self._messageLayer.purge(timeout_time)
+
     def close(self):
         """
         Stop the client.
@@ -76,7 +82,7 @@ class CoAP(object):
             event.set()
         if self._receiver_thread is not None:
             self._receiver_thread.join()
-        self._socket.close()
+        # self._socket.close()
 
     @property
     def current_mid(self):
@@ -97,16 +103,21 @@ class CoAP(object):
         assert isinstance(c, int)
         self._currentMID = c
 
-    def send_message(self, message):
+    def send_message(self, message, no_response=False):
         """
         Prepare a message to send on the UDP socket. Eventually set retransmissions.
 
         :param message: the message to send
+        :param no_response: whether to await a response from the request
         """
         if isinstance(message, Request):
             request = self._requestLayer.send_request(message)
             request = self._observeLayer.send_request(request)
             request = self._blockLayer.send_request(request)
+            if no_response:
+                # don't add the send message to the message layer transactions
+                self.send_datagram(request)
+                return
             transaction = self._messageLayer.send_request(request)
             self.send_datagram(transaction.request)
             if transaction.request.type == defines.Types["CON"]:
@@ -149,7 +160,7 @@ class CoAP(object):
         :param message: the message to send
         """
         host, port = message.destination
-        logger.debug("send_datagram - " + str(message))
+        logger.info("send_datagram - " + str(message))
         serializer = Serializer()
         raw_message = serializer.serialize(message)
 
@@ -264,7 +275,7 @@ class CoAP(object):
             message = serializer.deserialize(datagram, source)
 
             if isinstance(message, Response):
-                logger.debug("receive_datagram - " + str(message))
+                logger.info("receive_datagram - " + str(message))
                 transaction, send_ack = self._messageLayer.receive_response(message)
                 if transaction is None:  # pragma: no cover
                     continue
@@ -291,6 +302,7 @@ class CoAP(object):
                 self._messageLayer.receive_empty(message)
 
         logger.debug("Exiting receiver Thread due to request")
+        self._socket.close()
 
     def _send_ack(self, transaction):
         """

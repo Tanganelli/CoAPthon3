@@ -1,6 +1,8 @@
 import logging
 import time
+
 from coapthon import defines
+from coapthon import utils
 
 __author__ = 'Giacomo Tanganelli'
 
@@ -40,7 +42,7 @@ class ObserveLayer(object):
         if request.observe == 0:
             # Observe request
             host, port = request.destination
-            key_token = hash(str(host) + str(port) + str(request.token))
+            key_token = utils.str_append_hash(host, port, request.token)
 
             self._relations[key_token] = ObserveItem(time.time(), None, True, None)
 
@@ -56,7 +58,7 @@ class ObserveLayer(object):
         :return: the modified transaction
         """
         host, port = transaction.response.source
-        key_token = hash(str(host) + str(port) + str(transaction.response.token))
+        key_token = utils.str_append_hash(host, port, transaction.response.token)
         if key_token in self._relations and transaction.response.type == defines.Types["CON"]:
             transaction.notification = True
         return transaction
@@ -70,7 +72,7 @@ class ObserveLayer(object):
         :return: the message unmodified
         """
         host, port = message.destination
-        key_token = hash(str(host) + str(port) + str(message.token))
+        key_token = utils.str_append_hash(host, port, message.token)
         if key_token in self._relations and message.type == defines.Types["RST"]:
             del self._relations[key_token]
         return message
@@ -88,7 +90,7 @@ class ObserveLayer(object):
         if transaction.request.observe == 0:
             # Observe request
             host, port = transaction.request.source
-            key_token = hash(str(host) + str(port) + str(transaction.request.token))
+            key_token = utils.str_append_hash(host, port, transaction.request.token)
             non_counter = 0
             if key_token in self._relations:
                 # Renew registration
@@ -98,7 +100,7 @@ class ObserveLayer(object):
             self._relations[key_token] = ObserveItem(time.time(), non_counter, allowed, transaction)
         elif transaction.request.observe == 1:
             host, port = transaction.request.source
-            key_token = hash(str(host) + str(port) + str(transaction.request.token))
+            key_token = utils.str_append_hash(host, port, transaction.request.token)
             logger.info("Remove Subscriber")
             try:
                 del self._relations[key_token]
@@ -120,7 +122,7 @@ class ObserveLayer(object):
         """
         if empty.type == defines.Types["RST"]:
             host, port = transaction.request.source
-            key_token = hash(str(host) + str(port) + str(transaction.request.token))
+            key_token = utils.str_append_hash(host, port, transaction.request.token)
             logger.info("Remove Subscriber")
             try:
                 del self._relations[key_token]
@@ -138,7 +140,7 @@ class ObserveLayer(object):
         :return: the transaction unmodified
         """
         host, port = transaction.request.source
-        key_token = hash(str(host) + str(port) + str(transaction.request.token))
+        key_token = utils.str_append_hash(host, port, transaction.request.token)
         if key_token in self._relations:
             if transaction.response.code == defines.Codes.CONTENT.number:
                 if transaction.resource is not None and transaction.resource.observable:
@@ -188,9 +190,9 @@ class ObserveLayer(object):
 
         :param message: the message
         """
-        logger.debug("Remove Subcriber")
+        logger.info("Remove Subcriber")
         host, port = message.destination
-        key_token = hash(str(host) + str(port) + str(message.token))
+        key_token = utils.str_append_hash(host, port, message.token)
         try:
             self._relations[key_token].transaction.completed = True
             del self._relations[key_token]

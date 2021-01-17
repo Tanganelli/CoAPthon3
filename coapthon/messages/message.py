@@ -1,5 +1,9 @@
-from coapthon.utils import parse_blockwise
+# -*- coding: utf-8 -*-
+
+import binascii
+
 from coapthon import defines
+from coapthon import utils
 from coapthon.messages.option import Option
 
 __author__ = 'Giacomo Tanganelli'
@@ -115,15 +119,16 @@ class Message(object):
         """
         Set the Token of the message.
 
-        :type value: String
+        :type value: Bytes
         :param value: the Token
         :raise AttributeError: if value is longer than 256
         """
         if value is None:
             self._token = value
             return
-        if not isinstance(value, str):
-            value = str(value)
+        if not isinstance(value, bytes):
+            value = bytes(value)
+
         if len(value) > 256:
             raise AttributeError
         self._token = value
@@ -454,7 +459,7 @@ class Message(object):
         for e in etag:
             option = Option()
             option.number = defines.OptionRegistry.ETAG.number
-            if not  isinstance(e, bytes):
+            if not isinstance(e, bytes):
                 e = bytes(e, "utf-8")
             option.value = e
             self.add_option(option)
@@ -547,7 +552,7 @@ class Message(object):
         value = None
         for option in self.options:
             if option.number == defines.OptionRegistry.BLOCK1.number:
-                value = parse_blockwise(option.value)
+                value = utils.parse_blockwise(option.value)
         return value
 
     @block1.setter
@@ -599,7 +604,7 @@ class Message(object):
         value = None
         for option in self.options:
             if option.number == defines.OptionRegistry.BLOCK2.number:
-                value = parse_blockwise(option.value)
+                value = utils.parse_blockwise(option.value)
         return value
 
     @block2.setter
@@ -640,6 +645,24 @@ class Message(object):
         Delete the Block2 option.
         """
         self.del_option_by_number(defines.OptionRegistry.BLOCK2.number)
+        
+    def size1(self):
+        value = None
+        for option in self.options:
+            if option.number == defines.OptionRegistry.SIZE1.number:
+                value = option.value if option.value is not None else 0
+        return value
+
+    @size1.setter
+    def size1(self, value):
+        option = Option()
+        option.number = defines.OptionRegistry.SIZE1.number
+        option.value = value
+        self.add_option(option)
+
+    @size1.deleter
+    def size1(self):
+        self.del_option_by_number(defines.OptionRegistry.SIZE1.number)
 
     @property
     def size2(self):
@@ -651,7 +674,7 @@ class Message(object):
         value = None
         for option in self.options:
             if option.number == defines.OptionRegistry.SIZE2.number:
-                value = option.value
+                value = option.value 
         return value
 
     @size2.setter
@@ -685,11 +708,16 @@ class Message(object):
         if self._code is None:
             self._code = defines.Codes.EMPTY.number
 
+        token = binascii.hexlify(self._token).decode("utf-8") if self._token is not None else str(None)
+
         msg = "From {source}, To {destination}, {type}-{mid}, {code}-{token}, ["\
             .format(source=self._source, destination=self._destination, type=inv_types[self._type], mid=self._mid,
-                    code=defines.Codes.LIST[self._code].name, token=self._token)
+                    code=defines.Codes.LIST[self._code].name, token=token)
         for opt in self._options:
-            msg += "{name}: {value}, ".format(name=opt.name, value=opt.value)
+            if 'Block' in opt.name:
+                msg += "{name}: {value}, ".format(name=opt.name, value=utils.parse_blockwise(opt.value))
+            else:
+                msg += "{name}: {value}, ".format(name=opt.name, value=opt.value)
         msg += "]"
         if self.payload is not None:
             if isinstance(self.payload, dict):
@@ -717,9 +745,9 @@ class Message(object):
         msg += "MID: " + str(self._mid) + "\n"
         if self._code is None:
             self._code = 0
-
+        token = binascii.hexlify(self._token).decode("utf-8") if self._token is not None else str(None)
         msg += "Code: " + str(defines.Codes.LIST[self._code].name) + "\n"
-        msg += "Token: " + str(self._token) + "\n"
+        msg += "Token: " + token + "\n"
         for opt in self._options:
             msg += str(opt)
         msg += "Payload: " + "\n"

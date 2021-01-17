@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import time
 from coapthon import defines
 

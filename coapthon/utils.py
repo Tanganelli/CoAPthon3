@@ -1,7 +1,22 @@
+# -*- coding: utf-8 -*-
+
+import binascii
 import random
 import string
 
 __author__ = 'Giacomo Tanganelli'
+
+
+def str_append_hash(*args):
+    """ Convert each argument to a lower case string, appended, then hash """
+    ret_hash = ""
+    for i in args:
+        if isinstance(i, (str, int)):
+            ret_hash += str(i).lower()
+        elif isinstance(i, bytes):
+            ret_hash += binascii.hexlify(i).decode("utf-8")
+
+    return hash(ret_hash)
 
 
 def check_nocachekey(option):
@@ -51,7 +66,7 @@ def is_uri_option(number):
 
 
 def generate_random_token(size):
-    return ''.join(random.choice(string.ascii_letters) for _ in range(size))
+    return bytes([random.randint(0, 255) for _ in range(size)])
 
 
 def parse_blockwise(value):
@@ -186,3 +201,6 @@ class Tree(object):
 
     def __delitem__(self, key):
         del self.tree[key]
+
+    def __contains__(self, item):
+        return item in self.tree
