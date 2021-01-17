@@ -1,9 +1,9 @@
-import logging.config
-import os
+import logging
 import random
 import socket
 import threading
 import time
+import collections
 
 from coapthon import defines
 from coapthon.layers.blocklayer import BlockLayer
@@ -14,7 +14,6 @@ from coapthon.messages.message import Message
 from coapthon.messages.request import Request
 from coapthon.messages.response import Response
 from coapthon.serializer import Serializer
-import collections
 
 
 __author__ = 'Giacomo Tanganelli'
@@ -76,7 +75,7 @@ class CoAP(object):
             event.set()
         if self._receiver_thread is not None:
             self._receiver_thread.join()
-        self._socket.close()
+        # self._socket.close()
 
     @property
     def current_mid(self):
@@ -149,7 +148,7 @@ class CoAP(object):
         :param message: the message to send
         """
         host, port = message.destination
-        logger.debug("send_datagram - " + str(message))
+        logger.info("send_datagram - " + str(message))
         serializer = Serializer()
         raw_message = serializer.serialize(message)
 
@@ -264,7 +263,7 @@ class CoAP(object):
             message = serializer.deserialize(datagram, source)
 
             if isinstance(message, Response):
-                logger.debug("receive_datagram - " + str(message))
+                logger.info("receive_datagram - " + str(message))
                 transaction, send_ack = self._messageLayer.receive_response(message)
                 if transaction is None:  # pragma: no cover
                     continue
@@ -291,6 +290,7 @@ class CoAP(object):
                 self._messageLayer.receive_empty(message)
 
         logger.debug("Exiting receiver Thread due to request")
+        self._socket.close()
 
     def _send_ack(self, transaction):
         """

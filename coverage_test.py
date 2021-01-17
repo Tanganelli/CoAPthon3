@@ -1,8 +1,11 @@
+# -*- coding: utf-8 -*-
+
 from queue import Queue
 import random
 import socket
 import threading
 import unittest
+
 from coapclient import HelperClient
 from coapserver import CoAPServer
 from coapthon import defines
@@ -15,6 +18,48 @@ from coapthon.serializer import Serializer
 __author__ = 'Giacomo Tanganelli'
 __version__ = "2.0"
 
+PAYLOAD = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr,  sed diam nonumy eirmod tempor invidunt ut " \
+          "labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et " \
+          "ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum " \
+          "dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore " \
+          "magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. " \
+          "Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit " \
+          "amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna " \
+          "aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita " \
+          "kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. " \
+          "Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore " \
+          "eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum " \
+          "zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer " \
+          "adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. " \
+          "Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip " \
+          "ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie " \
+          "consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim " \
+          "qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. " \
+          "Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet doming id quod mazim placerat " \
+          "facer possim assum. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh " \
+          "euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis " \
+          "nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. " \
+          "Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore " \
+          "eu feugiat nulla facilisis. " \
+          "At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata " \
+          "sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam " \
+          "nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et " \
+          "accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem " \
+          "ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, At accusam aliquyam diam " \
+          "diam dolore dolores duo eirmod eos erat, et nonumy sed tempor et et invidunt justo labore Stet clita ea " \
+          "et gubergren, kasd magna no rebum. sanctus sea sed takimata ut vero voluptua. est Lorem ipsum dolor " \
+          "sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor " \
+          "invidunt ut labore et dolore magna aliquyam erat. " \
+          "Consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna " \
+          "aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita " \
+          "kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, " \
+          "consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam " \
+          "erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd " \
+          "gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, " \
+          "consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam " \
+          "erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd " \
+          "gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
+
 
 class Tests(unittest.TestCase):
 
@@ -23,7 +68,7 @@ class Tests(unittest.TestCase):
         self.current_mid = random.randint(1, 1000)
         self.server_mid = random.randint(1000, 2000)
         self.server = CoAPServer("127.0.0.1", 5683)
-        self.server_thread = threading.Thread(target=self.server.listen, args=(10,))
+        self.server_thread = threading.Thread(target=self.server.listen, args=(1,))
         self.server_thread.start()
         self.queue = Queue()
 
@@ -222,88 +267,86 @@ class Tests(unittest.TestCase):
         self.current_mid += 1
         self._test_with_client([exchange1, exchange2, exchange3, exchange4])
 
-    # def test_separate(self):
-    #     print "TEST_SEPARATE"
-    #     path = "/separate"
-    #     req = Request()
-    #     req.code = defines.Codes.GET.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["CON"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.CONTENT.number
-    #     expected.token = None
-    #     expected.max_age = 60
-    #
-    #     exchange1 = (req, expected)
-    #
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.POST.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     req.payload = "POST"
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["CON"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.CHANGED.number
-    #     expected.token = None
-    #     expected.options = None
-    #
-    #     exchange2 = (req, expected)
-    #
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.PUT.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     req.payload = "PUT"
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["CON"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.CHANGED.number
-    #     expected.token = None
-    #     expected.options = None
-    #
-    #     exchange3 = (req, expected)
-    #
-    #     self.current_mid += 1
-    #
-    #     req = Request()
-    #     req.code = defines.Codes.DELETE.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["CON"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.DELETED.number
-    #     expected.token = None
-    #
-    #     exchange4 = (req, expected)
-    #
-    #     self.current_mid += 1
-    #     self._test_with_client([exchange1, exchange2, exchange3, exchange4])
+    def test_separate(self):
+        print("TEST_SEPARATE")
+        path = "/separate"
+
+        req = Request()
+        req.code = defines.Codes.GET.number
+        req.uri_path = path
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+
+        expected = Response()
+        expected.type = defines.Types["CON"]
+        expected._mid = None
+        expected.code = defines.Codes.CONTENT.number
+        expected.token = None
+        expected.max_age = 60
+
+        exchange1 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.POST.number
+        req.uri_path = path
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        req.payload = "POST"
+
+        expected = Response()
+        expected.type = defines.Types["CON"]
+        expected._mid = None
+        expected.code = defines.Codes.CHANGED.number
+        expected.token = None
+        expected.options = None
+
+        exchange2 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.PUT.number
+        req.uri_path = path
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        req.payload = "PUT"
+
+        expected = Response()
+        expected.type = defines.Types["CON"]
+        expected._mid = None
+        expected.code = defines.Codes.CHANGED.number
+        expected.token = None
+        expected.options = None
+
+        exchange3 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.DELETE.number
+        req.uri_path = path
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+
+        expected = Response()
+        expected.type = defines.Types["CON"]
+        expected._mid = None
+        expected.code = defines.Codes.DELETED.number
+        expected.token = None
+
+        exchange4 = (req, expected)
+        self.current_mid += 1
+
+        self._test_with_client([exchange1, exchange2, exchange3, exchange4])
 
     def test_post(self):
         print("TEST_POST")
         path = "/storage/new_res?id=1"
-        req = Request()
 
+        req = Request()
         req.code = defines.Codes.POST.number
         req.uri_path = path
         req.type = defines.Types["CON"]
@@ -407,18 +450,7 @@ class Tests(unittest.TestCase):
         req.type = defines.Types["CON"]
         req._mid = self.current_mid
         req.destination = self.server_address
-        req.payload = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sollicitudin fermentum ornare. " \
-                       "Cras accumsan tellus quis dui lacinia eleifend. Proin ultrices rutrum orci vitae luctus. " \
-                       "Nullam malesuada pretium elit, at aliquam odio vehicula in. Etiam nec maximus elit. " \
-                       "Etiam at erat ac ex ornare feugiat. Curabitur sed malesuada orci, id aliquet nunc. Phasellus " \
-                       "nec leo luctus, blandit lorem sit amet, interdum metus. Duis efficitur volutpat magna, ac " \
-                       "ultricies nibh aliquet sit amet. Etiam tempor egestas augue in hendrerit. Nunc eget augue " \
-                       "ultricies, dignissim lacus et, vulputate dolor. Nulla eros odio, fringilla vel massa ut, " \
-                       "facilisis cursus quam. Fusce faucibus lobortis congue. Fusce consectetur porta neque, id " \
-                       "sollicitudin velit maximus eu. Sed pharetra leo quam, vel finibus turpis cursus ac. " \
-                       "Aenean ac nisi massa. Cras commodo arcu nec ante tristique ullamcorper. Quisque eu hendrerit" \
-                       " urna. Cras fringilla eros ut nunc maximus, non porta nisl mollis. Aliquam in rutrum massa." \
-                       " Praesent tristique turpis dui, at ultri"
+        req.payload = PAYLOAD
         req.block1 = (1, 1, 1024)
 
         expected = Response()
@@ -437,18 +469,7 @@ class Tests(unittest.TestCase):
         req.type = defines.Types["CON"]
         req._mid = self.current_mid
         req.destination = self.server_address
-        req.payload = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sollicitudin fermentum ornare. " \
-                       "Cras accumsan tellus quis dui lacinia eleifend. Proin ultrices rutrum orci vitae luctus. " \
-                       "Nullam malesuada pretium elit, at aliquam odio vehicula in. Etiam nec maximus elit. " \
-                       "Etiam at erat ac ex ornare feugiat. Curabitur sed malesuada orci, id aliquet nunc. Phasellus " \
-                       "nec leo luctus, blandit lorem sit amet, interdum metus. Duis efficitur volutpat magna, ac " \
-                       "ultricies nibh aliquet sit amet. Etiam tempor egestas augue in hendrerit. Nunc eget augue " \
-                       "ultricies, dignissim lacus et, vulputate dolor. Nulla eros odio, fringilla vel massa ut, " \
-                       "facilisis cursus quam. Fusce faucibus lobortis congue. Fusce consectetur porta neque, id " \
-                       "sollicitudin velit maximus eu. Sed pharetra leo quam, vel finibus turpis cursus ac. " \
-                       "Aenean ac nisi massa. Cras commodo arcu nec ante tristique ullamcorper. Quisque eu hendrerit" \
-                       " urna. Cras fringilla eros ut nunc maximus, non porta nisl mollis. Aliquam in rutrum massa." \
-                       " Praesent tristique turpis dui, at ultri"
+        req.payload = PAYLOAD
         req.block1 = (0, 1, 1024)
 
         expected = Response()
@@ -468,10 +489,7 @@ class Tests(unittest.TestCase):
         req.type = defines.Types["CON"]
         req._mid = self.current_mid
         req.destination = self.server_address
-        req.payload = "a imperdiet nisl. Quisque a iaculis libero, id tempus lacus. Aenean convallis est non justo " \
-                       "consectetur, a hendrerit enim consequat. In accumsan ante a egestas luctus. Etiam quis neque " \
-                       "nec eros vestibulum faucibus. Nunc viverra ipsum lectus, vel scelerisque dui dictum a. Ut orci " \
-                       "enim, ultrices a ultrices nec, pharetra in quam. Donec accumsan sit amet eros eget fermentum."
+        req.payload = PAYLOAD
         req.block1 = (1, 1, 64)
 
         expected = Response()
@@ -491,10 +509,7 @@ class Tests(unittest.TestCase):
         req.type = defines.Types["CON"]
         req._mid = self.current_mid
         req.destination = self.server_address
-        req.payload = "a imperdiet nisl. Quisque a iaculis libero, id tempus lacus. Aenean convallis est non justo " \
-                       "consectetur, a hendrerit enim consequat. In accumsan ante a egestas luctus. Etiam quis neque " \
-                       "nec eros vestibulum faucibus. Nunc viverra ipsum lectus, vel scelerisque dui dictum a. Ut orci " \
-                       "enim, ultrices a ultrices nec, pharetra in quam. Donec accumsan sit amet eros eget fermentum."
+        req.payload = PAYLOAD
         req.block1 = (3, 1, 64)
 
         expected = Response()
@@ -513,10 +528,7 @@ class Tests(unittest.TestCase):
         req.type = defines.Types["CON"]
         req._mid = self.current_mid
         req.destination = self.server_address
-        req.payload = "a imperdiet nisl. Quisque a iaculis libero, id tempus lacus. Aenean convallis est non justo " \
-                       "consectetur, a hendrerit enim consequat. In accumsan ante a egestas luctus. Etiam quis neque " \
-                       "nec eros vestibulum faucibus. Nunc viverra ipsum lectus, vel scelerisque dui dictum a. Ut orci " \
-                       "enim, ultrices a ultrices nec, pharetra in quam. Donec accumsan sit amet eros eget fermentum."
+        req.payload = PAYLOAD
         req.block1 = (2, 0, 64)
 
         expected = Response()
@@ -543,6 +555,27 @@ class Tests(unittest.TestCase):
         req._mid = self.current_mid
         req.destination = self.server_address
         req.payload = None
+        # req.block2 = (0, 0, 512)
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = None
+        expected.code = defines.Codes.CONTENT.number
+        expected.token = None
+        expected.payload = None
+        expected.block2 = (0, 1, defines.MAX_PAYLOAD)
+        expected.size2 = 2041
+
+        exchange0 = (req, expected)
+        self.current_mid += 1
+
+        req = Request()
+        req.code = defines.Codes.GET.number
+        req.uri_path = path
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        req.payload = None
         req.block2 = (0, 0, 512)
 
         expected = Response()
@@ -552,6 +585,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (0, 1, 512)
+        expected.size2 = 2041
 
         exchange1 = (req, expected)
         self.current_mid += 1
@@ -572,6 +606,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (1, 1, 256)
+        expected.size2 = 2041
 
         exchange2 = (req, expected)
         self.current_mid += 1
@@ -592,6 +627,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (2, 1, 128)
+        expected.size2 = 2041
 
         exchange3 = (req, expected)
         self.current_mid += 1
@@ -612,6 +648,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (3, 1, 64)
+        expected.size2 = 2041
 
         exchange4 = (req, expected)
         self.current_mid += 1
@@ -632,6 +669,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (4, 1, 32)
+        expected.size2 = 2041
 
         exchange5 = (req, expected)
         self.current_mid += 1
@@ -652,6 +690,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (5, 1, 16)
+        expected.size2 = 2041
 
         exchange6 = (req, expected)
         self.current_mid += 1
@@ -671,7 +710,8 @@ class Tests(unittest.TestCase):
         expected.code = defines.Codes.CONTENT.number
         expected.token = None
         expected.payload = None
-        expected.block2 = (6, 1, 1024)
+        expected.block2 = (6, 0, 1024)
+        expected.size2 = 2041
 
         exchange7 = (req, expected)
         self.current_mid += 1
@@ -692,11 +732,13 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = None
         expected.block2 = (7, 0, 1024)
+        expected.size2 = 2041
 
         exchange8 = (req, expected)
         self.current_mid += 1
 
-        self._test_plugtest([exchange1, exchange2, exchange3, exchange4, exchange5, exchange6, exchange7, exchange8])
+        self._test_plugtest([exchange0, exchange1, exchange2, exchange3, exchange4,
+                             exchange5, exchange6, exchange7, exchange8])
 
     def test_post_block_big(self):
         print("TEST_POST_BLOCK_BIG")
@@ -708,7 +750,7 @@ class Tests(unittest.TestCase):
         req.type = defines.Types["CON"]
         req._mid = self.current_mid
         req.destination = self.server_address
-        req.payload = "Lorem ipsum dolo"
+        req.payload = PAYLOAD
         req.block1 = (0, 1, 16)
 
         expected = Response()
@@ -728,7 +770,7 @@ class Tests(unittest.TestCase):
         req.type = defines.Types["CON"]
         req._mid = self.current_mid
         req.destination = self.server_address
-        req.payload = "r sit amet, consectetur adipisci"
+        req.payload = PAYLOAD
         req.block1 = (1, 1, 32)
 
         expected = Response()
@@ -748,7 +790,7 @@ class Tests(unittest.TestCase):
         req.type = defines.Types["CON"]
         req._mid = self.current_mid
         req.destination = self.server_address
-        req.payload = "ng elit. Sed ut ultrices ligula. Pellentesque purus augue, cursu"
+        req.payload = PAYLOAD
         req.block1 = (2, 1, 64)
 
         expected = Response()
@@ -768,8 +810,7 @@ class Tests(unittest.TestCase):
         req.type = defines.Types["CON"]
         req._mid = self.current_mid
         req.destination = self.server_address
-        req.payload = "s ultricies est in, vehicula congue metus. Vestibulum vel justo lacinia, porttitor quam vitae, " \
-                      "feugiat sapien. Quisque finibus, "
+        req.payload = PAYLOAD
         req.block1 = (3, 1, 128)
 
         expected = Response()
@@ -789,9 +830,7 @@ class Tests(unittest.TestCase):
         req.type = defines.Types["CON"]
         req._mid = self.current_mid
         req.destination = self.server_address
-        req.payload = "nisi vitae rhoncus malesuada, augue mauris dapibus tellus, sit amet venenatis libero" \
-                      " libero sed lorem. In pharetra turpis sed eros porta mollis. Quisque dictum dolor nisl," \
-                      " imperdiet tincidunt augue malesuada vitae. Donec non felis urna. Suspendisse at hend"
+        req.payload = PAYLOAD
         req.block1 = (4, 1, 256)
 
         expected = Response()
@@ -811,12 +850,7 @@ class Tests(unittest.TestCase):
         req.type = defines.Types["CON"]
         req._mid = self.current_mid
         req.destination = self.server_address
-        req.payload = "rerit ex, quis aliquet ante. Vivamus ultrices dolor at elit tincidunt, eget fringilla " \
-                      "ligula vestibulum. In molestie sagittis nibh, ut efficitur tellus faucibus non. Maecenas " \
-                      "posuere elementum faucibus. Morbi nisi diam, molestie non feugiat et, elementum eget magna." \
-                      " Donec vel sem facilisis quam viverra ultrices nec eu lacus. Sed molestie nisi id ultrices " \
-                      "interdum. Curabitur pharetra sed tellus in dignissim. Duis placerat aliquam metus, volutpat " \
-                      "elementum augue aliquam a. Nunc sed dolor at orci maximus portt"
+        req.payload = PAYLOAD
         req.block1 = (5, 1, 512)
 
         expected = Response()
@@ -836,18 +870,7 @@ class Tests(unittest.TestCase):
         req.type = defines.Types["CON"]
         req._mid = self.current_mid
         req.destination = self.server_address
-        req.payload = "itor ac sit amet eros. Mauris et nisi in tortor pharetra rhoncus sit amet hendrerit metus. " \
-                      "Integer laoreet placerat cursus. Nam a nulla ex. Donec laoreet sagittis libero quis " \
-                      "imperdiet. Vivamus facilisis turpis nec rhoncus venenatis. Duis pulvinar tellus vel quam " \
-                      "maximus imperdiet. Mauris eget nibh orci. Duis ut cursus nibh. Nulla sed commodo elit. " \
-                      "Suspendisse ac eros lacinia, mattis turpis at, porttitor justo. Vivamus molestie " \
-                      "tincidunt libero. Etiam porttitor lacus odio, at lobortis tortor scelerisque nec. " \
-                      "Nullam non ante vel nisi ultrices consectetur. Maecenas massa felis, tempor eget " \
-                      "malesuada eget, pretium eu sapien. Vivamus dapibus ante erat, non faucibus orci sodales " \
-                      "sit amet. Cras magna felis, sodales eget magna sed, eleifend rutrum ligula. Vivamus interdum " \
-                      "enim enim, eu facilisis tortor dignissim quis. Ut metus nulla, mattis non lorem et, " \
-                      "elementum ultrices orci. Quisque eleifend, arcu vitae ullamcorper pulvinar, ipsum ex " \
-                      "sodales arcu, eget consectetur mauris metus ac tortor. Donec id sem felis. Maur"
+        req.payload = PAYLOAD
         req.block1 = (6, 0, 1024)
 
         expected = Response()
@@ -856,7 +879,6 @@ class Tests(unittest.TestCase):
         expected.code = defines.Codes.CHANGED.number
         expected.token = None
         expected.payload = None
-        expected.location_path = "big"
 
         exchange7 = (req, expected)
         self.current_mid += 1
@@ -941,75 +963,74 @@ class Tests(unittest.TestCase):
 
         self._test_with_client([exchange1, exchange2, exchange3])
 
-    # def test_long_options(self):
-    #     """
-    #     Test processing of options with extended length
-    #     """
-    #     print("TEST_LONG_OPTIONS")
-    #
-    #     path = "/storage/"
-    #     req = Request()
-    #     req.code = defines.Codes.GET.number
-    #     req.uri_path = path
-    #     req.type = defines.Types["CON"]
-    #     req._mid = self.current_mid
-    #     req.destination = self.server_address
-    #     option = Option()
-    #     # This option should be silently ignored by the server
-    #     # since it is not critical
-    #     option.number = defines.OptionRegistry.RM_MESSAGE_SWITCHING.number
-    #     option.value = "\1\1\1\1\0\0"
-    #     options = req.options
-    #     req.add_option(option)
-    #     req.payload = "test"
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected.code = defines.Codes.CONTENT.number
-    #     expected.token = None
-    #     expected.payload = None
-    #
-    #     exchange1 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     self._test_with_client([exchange1])
-    #
-    #     # This option (244) should be silently ignored by the server
-    #     req = ("\x40\x01\x01\x01\xd6\xe7\x01\x01\x01\x01\x00\x00", self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["ACK"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.NOT_FOUND.number
-    #     expected.token = None
-    #     expected.payload = None
-    #
-    #     exchange21 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     # This option (245) should cause BAD REQUEST, as unrecognizable critical
-    #     req = ("\x40\x01\x01\x01\xd6\xe8\x01\x01\x01\x01\x00\x00", self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange22 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     # This option (65525) should cause BAD REQUEST, as unrecognizable critical
-    #     req = ("\x40\x01\x01\x01\xe6\xfe\xe8\x01\x01\x01\x01\x00\x00", self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange23 = (req, expected)
-    #     self.current_mid += 1
-    #
-    #     self._test_datagram([exchange21, exchange22, exchange23])
+    def test_long_options(self):
+        """
+        Test processing of options with extended length
+        """
+        print("TEST_LONG_OPTIONS")
+        path = "/storage/"
+
+        req = Request()
+        req.code = defines.Codes.GET.number
+        req.uri_path = path
+        req.type = defines.Types["CON"]
+        req._mid = self.current_mid
+        req.destination = self.server_address
+        option = Option()
+        # This option should be silently ignored by the server
+        # since it is not critical
+        option.number = defines.OptionRegistry.RM_MESSAGE_SWITCHING.number
+        option.value = b'\1\1\1\1\0\0'
+        req.add_option(option)
+        req.payload = "test"
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected.code = defines.Codes.CONTENT.number
+        expected.token = None
+        expected.payload = None
+
+        exchange1 = (req, expected)
+        self.current_mid += 1
+
+        self._test_with_client([exchange1])
+
+        # This option (244) should be silently ignored by the server
+        req = (b'\x40\x01\x01\x01\xd6\xe7\x01\x01\x01\x01\x00\x00', self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["ACK"]
+        expected._mid = None
+        expected.code = defines.Codes.NOT_FOUND.number
+        expected.token = None
+        expected.payload = None
+
+        exchange21 = (req, expected)
+        self.current_mid += 1
+
+        # This option (245) should cause BAD REQUEST, as unrecognizable critical
+        req = (b'\x40\x01\x01\x01\xd6\xe8\x01\x01\x01\x01\x00\x00', self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange22 = (req, expected)
+        self.current_mid += 1
+
+        # This option (65525) should cause BAD REQUEST, as unrecognizable critical
+        req = (b'\x40\x01\x01\x01\xe6\xfe\xe8\x01\x01\x01\x01\x00\x00', self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange23 = (req, expected)
+        self.current_mid += 1
+
+        self._test_datagram([exchange21, exchange22, exchange23])
 
     def test_content_type(self):
         print("TEST_CONTENT_TYPE")
@@ -1138,7 +1159,7 @@ class Tests(unittest.TestCase):
         expected.token = None
         expected.payload = "<value>0</value>"
 
-        print((expected.pretty_print()))
+        print(expected.pretty_print())
 
         exchange7 = (req, expected)
         self.current_mid += 1
@@ -1198,9 +1219,8 @@ class Tests(unittest.TestCase):
         exchange10 = (req, expected)
         self.current_mid += 1
 
-        # self._test_with_client([exchange1, exchange2, exchange3, exchange4, exchange5, exchange6, exchange7,
-        #                         exchange8, exchange9, exchange10])
-        self._test_with_client([exchange1, exchange2, exchange3, exchange4, exchange5])
+        self._test_with_client([exchange1, exchange2, exchange3, exchange4, exchange5,
+                                exchange6, exchange7, exchange8, exchange9, exchange10])
 
     def test_ETAG(self):
         print("TEST_ETAG")
@@ -1238,7 +1258,6 @@ class Tests(unittest.TestCase):
         expected.code = defines.Codes.CHANGED.number
         expected.token = None
         expected.payload = None
-        expected.location_path = path
         expected.etag = "1"
 
         exchange2 = (req, expected)
@@ -1301,7 +1320,7 @@ class Tests(unittest.TestCase):
         expected.code = defines.Codes.CREATED.number
         expected.token = None
         expected.payload = None
-        expected.location_path = path
+        expected.location_path = "child"
 
         exchange1 = (req, expected)
         self.current_mid += 1
@@ -1376,7 +1395,7 @@ class Tests(unittest.TestCase):
         expected.type = defines.Types["ACK"]
         expected._mid = self.current_mid
         expected.code = defines.Codes.NOT_FOUND.number
-        expected.token = "100"
+        expected.token = 100
         expected.payload = None
 
         exchange1 = (req, expected)
@@ -1436,60 +1455,60 @@ class Tests(unittest.TestCase):
 
         self._test_with_client([exchange1, exchange2, exchange3, exchange4])
 
-    # def test_invalid(self):
-    #     print("TEST_INVALID")
-    #
-    #     # version
-    #     req = ("\x00\x01\x8c\xda", self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange1 = (req, expected)
-    #
-    #     # version
-    #     req = ("\x40", self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange2 = (req, expected)
-    #
-    #     # code
-    #     req = ("\x40\x05\x8c\xda", self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange3 = (req, expected)
-    #
-    #     # option
-    #     req = ("\x40\x01\x8c\xda\x94", self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange4 = (req, expected)
-    #
-    #     # payload marker
-    #     req = ("\x40\x02\x8c\xda\x75\x62\x61\x73\x69\x63\xff", self.server_address)
-    #
-    #     expected = Response()
-    #     expected.type = defines.Types["RST"]
-    #     expected._mid = None
-    #     expected.code = defines.Codes.BAD_REQUEST.number
-    #
-    #     exchange5 = (req, expected)
-    #
-    #     self._test_datagram([exchange1, exchange2, exchange3, exchange4, exchange5])
+    def test_invalid(self):
+        print("TEST_INVALID")
+
+        # version
+        req = (b'\x00\x01\x8c\xda', self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange1 = (req, expected)
+
+        # version
+        req = (b'\x40', self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange2 = (req, expected)
+
+        # code
+        req = (b'\x40\x05\x8c\xda', self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange3 = (req, expected)
+
+        # option
+        req = (b'\x40\x01\x8c\xda\x94', self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange4 = (req, expected)
+
+        # payload marker
+        req = (b'\x40\x02\x8c\xda\x75\x62\x61\x73\x69\x63\xff', self.server_address)
+
+        expected = Response()
+        expected.type = defines.Types["RST"]
+        expected._mid = None
+        expected.code = defines.Codes.BAD_REQUEST.number
+
+        exchange5 = (req, expected)
+
+        self._test_datagram([exchange1, exchange2, exchange3, exchange4, exchange5])
 
     def test_post_block_big_client(self):
         print("TEST_POST_BLOCK_BIG_CLIENT")
@@ -1571,6 +1590,6 @@ class Tests(unittest.TestCase):
 
         self._test_with_client_observe([exchange1, exchange2])
 
+
 if __name__ == '__main__':
     unittest.main()
-

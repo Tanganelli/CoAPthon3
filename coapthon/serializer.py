@@ -1,6 +1,7 @@
 import logging
 import struct
 import ctypes
+
 from coapthon.messages.request import Request
 from coapthon.messages.response import Response
 from coapthon.messages.option import Option
@@ -51,10 +52,7 @@ class Serializer(object):
             message.type = message_type
             message.mid = mid
             if token_length > 0:
-                fmt = "%ss" % token_length
-                s = struct.Struct(fmt)
-                token_value = s.unpack_from(datagram[pos:])[0]
-                message.token = token_value.decode("utf-8")
+                message.token = datagram[pos:pos+token_length]
             else:
                 message.token = None
 
@@ -70,6 +68,7 @@ class Serializer(object):
                     # the first 4 bits of the byte represent the option delta
                     # delta = self._reader.read(4).uint
                     num, option_length, pos = Serializer.read_option_value_len_from_byte(next_byte, pos, values)
+                    logger.debug("option value (delta): %d len: %d", num, option_length)
                     current_option += num
                     # read option
                     try:
@@ -81,8 +80,7 @@ class Serializer(object):
                         else:
                             # If the non-critical option is unknown
                             # (vendor-specific, proprietary) - just skip it
-                            #log.err("unrecognized option %d" % current_option)
-                            pass
+                            logger.warning("unrecognized option %d", current_option)
                     else:
                         if option_length == 0:
                             value = None
@@ -113,13 +111,17 @@ class Serializer(object):
                         raise AttributeError("Packet length %s, pos %s" % (length_packet, pos))
                     message.payload = ""
                     payload = values[pos:]
-                    try:
-                        if message.payload_type == defines.Content_types["application/octet-stream"]:
-                            message.payload = payload
-                        else:
+                    if hasattr(message, 'payload_type') and message.payload_type in [
+                        defines.Content_types["application/octet-stream"],
+                        defines.Content_types["application/exi"],
+                        defines.Content_types["application/cbor"]
+                    ]:
+                        message.payload = payload
+                    else:
+                        try:
                             message.payload = payload.decode("utf-8")
-                    except AttributeError:
-                        message.payload = payload.decode("utf-8")
+                        except AttributeError:
+                            message.payload = payload
                     pos += len(payload)
 
             return message
@@ -140,7 +142,7 @@ class Serializer(object):
         """
         fmt = "!BBH"
 
-        if message.token is None or message.token == "":
+        if message.token is None:
             tkl = 0
         else:
             tkl = len(message.token)
@@ -153,9 +155,9 @@ class Serializer(object):
 
         if message.token is not None and tkl > 0:
 
-            for b in str(message.token):
-                fmt += "c"
-                values.append(bytes(b, "utf-8"))
+            for b in message.token:
+                fmt += "B"
+                values.append(b)
 
         options = Serializer.as_sorted_list(message.options)  # already sorted
         lastoptionnumber = 0
@@ -200,7 +202,6 @@ class Serializer(object):
                 elif opt_type == defines.STRING:
                     fmt += str(len(bytes(option.value, "utf-8"))) + "s"
                     values.append(bytes(option.value, "utf-8"))
-
                 else:  # OPAQUE
                     for b in option.value:
                         fmt += "B"
@@ -225,9 +226,6 @@ class Serializer(object):
             else:
                 fmt += str(len(bytes(payload, "utf-8"))) + "s"
                 values.append(bytes(payload, "utf-8"))
-            # for b in str(payload):
-            #     fmt += "c"
-            #     values.append(bytes(b, "utf-8"))
 
         datagram = None
         if values[1] is None:
@@ -266,28 +264,6 @@ class Serializer(object):
         return defines.RESPONSE_CODE_LOWER_BOUND <= code <= defines.RESPONSE_CODE_UPPER_BOUND
 
     @staticmethod
-    def read_option_value_from_nibble(nibble, pos, values):
-        """
-        Calculates the value used in the extended option fields.
-
-        :param nibble: the 4-bit option header value.
-        :return: the value calculated from the nibble and the extended option value.
-        """
-        if nibble <= 12:
-            return nibble, pos
-        elif nibble == 13:
-            tmp = struct.unpack("!B", values[pos].to_bytes(1, "big"))[0] + 13
-            pos += 1
-            return tmp, pos
-        elif nibble == 14:
-            s = struct.Struct("!H")
-            tmp = s.unpack_from(values[pos:].to_bytes(2, "big"))[0] + 269
-            pos += 2
-            return tmp, pos
-        else:
-            raise AttributeError("Unsupported option nibble " + str(nibble))
-
-    @staticmethod
     def read_option_value_len_from_byte(byte, pos, values):
         """
         Calculates the value and length used in the extended option fields.
@@ -306,7 +282,7 @@ class Serializer(object):
             pos += 1
         elif h_nibble == 14:
             s = struct.Struct("!H")
-            value = s.unpack_from(values[pos:].to_bytes(2, "big"))[0] + 269
+            value = s.unpack_from(values[pos:pos+2])[0] + 269
             pos += 2
         else:
             raise AttributeError("Unsupported option number nibble " + str(h_nibble))
@@ -317,7 +293,8 @@ class Serializer(object):
             length = struct.unpack("!B", values[pos].to_bytes(1, "big"))[0] + 13
             pos += 1
         elif l_nibble == 14:
-            length = s.unpack_from(values[pos:].to_bytes(2, "big"))[0] + 269
+            s = struct.Struct("!H")
+            length = s.unpack_from(values[pos:pos+2])[0] + 269
             pos += 2
         else:
             raise AttributeError("Unsupported option length nibble " + str(l_nibble))
@@ -326,7 +303,7 @@ class Serializer(object):
     @staticmethod
     def convert_to_raw(number, value, length):
         """
-        Get the value of an option as a ByteArray.
+        Get the value of an option as bytes.
 
         :param number: the option number
         :param value: the option value
@@ -353,11 +330,11 @@ class Serializer(object):
         if isinstance(value, str):
             value = str(value)
         if isinstance(value, str):
-            return bytearray(value, "utf-8")
+            return bytes(value, "utf-8")
         elif isinstance(value, int):
             return value
         else:
-            return bytearray(value)
+            return bytes(value)
 
     @staticmethod
     def as_sorted_list(options):

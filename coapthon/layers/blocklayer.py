@@ -1,5 +1,7 @@
 import logging
+
 from coapthon import defines
+from coapthon import utils
 from coapthon.messages.request import Request
 from coapthon.messages.response import Response
 
@@ -33,10 +35,10 @@ class BlockLayer(object):
     Handle the Blockwise options. Hides all the exchange to both servers and clients.
     """
     def __init__(self):
-        self._block1_sent = {}
-        self._block2_sent = {}
-        self._block1_receive = {}
-        self._block2_receive = {}
+        self._block1_sent = {}  # type: dict[hash, BlockItem]
+        self._block2_sent = {}  # type: dict[hash, BlockItem]
+        self._block1_receive = {}  # type: dict[hash, BlockItem]
+        self._block2_receive = {}  # type: dict[hash, BlockItem]
 
     def receive_request(self, transaction):
         """
@@ -49,7 +51,7 @@ class BlockLayer(object):
         """
         if transaction.request.block2 is not None:
             host, port = transaction.request.source
-            key_token = hash(str(host) + str(port) + str(transaction.request.token))
+            key_token = utils.str_append_hash(host, port, transaction.request.token)
             num, m, size = transaction.request.block2
             if key_token in self._block2_receive:
                 self._block2_receive[key_token].num = num
@@ -65,9 +67,13 @@ class BlockLayer(object):
         elif transaction.request.block1 is not None:
             # POST or PUT
             host, port = transaction.request.source
-            key_token = hash(str(host) + str(port) + str(transaction.request.token))
+            key_token = utils.str_append_hash(host, port, transaction.request.token)
             num, m, size = transaction.request.block1
+            if transaction.request.size1 is not None:
+                # What to do if the size1 is larger than the maximum resource size or the maxium server buffer
+                pass
             if key_token in self._block1_receive:
+                # n-th block
                 content_type = transaction.request.content_type
                 if num != self._block1_receive[key_token].num \
                         or content_type != self._block1_receive[key_token].content_type:
@@ -118,7 +124,7 @@ class BlockLayer(object):
         :return: the edited transaction
         """
         host, port = transaction.response.source
-        key_token = hash(str(host) + str(port) + str(transaction.response.token))
+        key_token = utils.str_append_hash(host, port, transaction.response.token)
         if key_token in self._block1_sent and transaction.response.block1 is not None:
             item = self._block1_sent[key_token]
             transaction.block_transfer = True
@@ -145,6 +151,8 @@ class BlockLayer(object):
             else:
                 item.m = 1
             request.block1 = (item.num, item.m, item.size)
+            # The original request already has this option set
+            # request.size1 = len(item.payload)
         elif transaction.response.block2 is not None:
 
             num, m, size = transaction.response.block2
@@ -208,7 +216,7 @@ class BlockLayer(object):
         :return: the edited transaction
         """
         host, port = transaction.request.source
-        key_token = hash(str(host) + str(port) + str(transaction.request.token))
+        key_token = utils.str_append_hash(host, port, transaction.request.token)
         if (key_token in self._block2_receive and transaction.response.payload is not None) or \
                 (transaction.response.payload is not None and len(transaction.response.payload) > defines.MAX_PAYLOAD):
             if key_token in self._block2_receive:
@@ -225,10 +233,13 @@ class BlockLayer(object):
 
                 self._block2_receive[key_token] = BlockItem(byte, num, m, size)
 
-            if len(transaction.response.payload) > (byte + size):
-                m = 1
-            else:
-                m = 0
+            # correct m
+            m = 0 if ((num * size) + size) > len(transaction.response.payload) else 1
+            # add size2 if requested or if payload is bigger than one datagram
+            del transaction.response.size2
+            if (transaction.request.size2 is not None and transaction.request.size2 == 0) or \
+               (transaction.response.payload is not None and len(transaction.response.payload) > defines.MAX_PAYLOAD):
+                transaction.response.size2 = len(transaction.response.payload)
             transaction.response.payload = transaction.response.payload[byte:byte + size]
             del transaction.response.block2
             transaction.response.block2 = (num, m, size)
@@ -251,21 +262,24 @@ class BlockLayer(object):
         assert isinstance(request, Request)
         if request.block1 or (request.payload is not None and len(request.payload) > defines.MAX_PAYLOAD):
             host, port = request.destination
-            key_token = hash(str(host) + str(port) + str(request.token))
+            key_token = utils.str_append_hash(host, port, request.token)
             if request.block1:
                 num, m, size = request.block1
             else:
                 num = 0
                 m = 1
                 size = defines.MAX_PAYLOAD
-
+            # correct m
+            m = 0 if ((num * size) + size) > len(request.payload) else 1
+            del request.size1
+            request.size1 = len(request.payload)
             self._block1_sent[key_token] = BlockItem(size, num, m, size, request.payload, request.content_type)
             request.payload = request.payload[0:size]
             del request.block1
             request.block1 = (num, m, size)
         elif request.block2:
             host, port = request.destination
-            key_token = hash(str(host) + str(port) + str(request.token))
+            key_token = utils.str_append_hash(host, port, request.token)
             num, m, size = request.block2
             item = BlockItem(size, num, m, size, "", None)
             self._block2_sent[key_token] = item

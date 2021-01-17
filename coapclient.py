@@ -59,7 +59,7 @@ def main():  # pragma: no cover
                                                                "payload_file="])
     except getopt.GetoptError as err:
         # print help information and exit:
-        print((str(err)))  # will print something like "option -a not recognized"
+        print(str(err))  # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
     for o, a in opts:
@@ -107,7 +107,7 @@ def main():  # pragma: no cover
             usage()
             sys.exit(2)
         response = client.get(path)
-        print((response.pretty_print()))
+        print(response.pretty_print())
         client.stop()
     elif op == "OBSERVE":
         if path is None:
@@ -122,7 +122,7 @@ def main():  # pragma: no cover
             usage()
             sys.exit(2)
         response = client.delete(path)
-        print((response.pretty_print()))
+        print(response.pretty_print())
         client.stop()
     elif op == "POST":
         if path is None:
@@ -134,7 +134,7 @@ def main():  # pragma: no cover
             usage()
             sys.exit(2)
         response = client.post(path, payload)
-        print((response.pretty_print()))
+        print(response.pretty_print())
         client.stop()
     elif op == "PUT":
         if path is None:
@@ -146,11 +146,11 @@ def main():  # pragma: no cover
             usage()
             sys.exit(2)
         response = client.put(path, payload)
-        print((response.pretty_print()))
+        print(response.pretty_print())
         client.stop()
     elif op == "DISCOVER":
         response = client.discover()
-        print((response.pretty_print()))
+        print(response.pretty_print())
         client.stop()
     else:
         print("Operation not recognized")

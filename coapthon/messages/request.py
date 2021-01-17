@@ -178,6 +178,20 @@ class Request(Message):
                 return True
         return False
 
+    @if_none_match.setter
+    def if_none_match(self, value):
+        """
+        Set the If-Match option of a request.
+
+        :param value: True/False
+        :type values : bool
+        """
+        assert isinstance(value, bool)
+        option = Option()
+        option.number = defines.OptionRegistry.IF_NONE_MATCH.number
+        option.value = None
+        self.add_option(option)
+
     def add_if_none_match(self):
         """
         Add the if-none-match option to the request.

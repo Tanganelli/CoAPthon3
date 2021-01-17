@@ -1,10 +1,9 @@
-import logging.config
+import logging
 import random
 import socket
 import struct
 import threading
 import xml.etree.ElementTree as ElementTree
-
 import os
 import re
 
@@ -81,6 +80,8 @@ class CoAP(object):
             # Use given socket, could be a DTLS socket
             self._socket = sock
 
+            self.parse_config()
+
         elif self.multicast:  # pragma: no cover
 
             # Create a socket
@@ -94,27 +95,26 @@ class CoAP(object):
                 # Allow multiple copies of this program on one machine
                 # (not strictly needed)
                 self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self._socket.bind((defines.ALL_COAP_NODES, self.server_address[1]))
+                self._socket.bind(('', self.server_address[1]))
+
                 mreq = struct.pack("4sl", socket.inet_aton(defines.ALL_COAP_NODES), socket.INADDR_ANY)
                 self._socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
-                self._unicast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                self._unicast_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self._unicast_socket.bind(self.server_address)
             else:
+                # Bugfix for Python 3.6 for Windows ... missing IPPROTO_IPV6 constant
+                if not hasattr(socket, 'IPPROTO_IPV6'):
+                    socket.IPPROTO_IPV6 = 41
+
                 self._socket = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 
                 # Allow multiple copies of this program on one machine
                 # (not strictly needed)
                 self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self._socket.bind((defines.ALL_COAP_NODES_IPV6, self.server_address[1]))
+                self._socket.bind(('', self.server_address[1]))
 
                 addrinfo_multicast = socket.getaddrinfo(defines.ALL_COAP_NODES_IPV6, 5683)[0]
                 group_bin = socket.inet_pton(socket.AF_INET6, addrinfo_multicast[4][0])
                 mreq = group_bin + struct.pack('@I', 0)
                 self._socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_JOIN_GROUP, mreq)
-                self._unicast_socket = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
-                self._unicast_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self._unicast_socket.bind(self.server_address)
         else:
             if addrinfo[0] == socket.AF_INET:  # IPv4
                 self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -172,7 +172,8 @@ class CoAP(object):
         host, port = response.source
 
         if response.code == defines.Codes.CONTENT.number:
-            resource = Resource('server', self, visible=True, observable=False, allow_children=True)
+            resource = RemoteResource('server', (host, port), "/",
+                                      coap_server=self, visible=True, observable=False, allow_children=True)
             self.add_resource(name, resource)
             self._mapping[name] = (host, port)
             self.parse_core_link_format(response.payload, name, (host, port))
@@ -208,8 +209,8 @@ class CoAP(object):
                         dict_att[a[0]] = a[0]
                 link_format = link_format[result.end(0) + 1:]
             # TODO handle observing
-            resource = RemoteResource('server', remote_server, path, coap_server=self, visible=True, observable=False,
-                                      allow_children=True)
+            resource = RemoteResource('server', remote_server, path,
+                                      coap_server=self, visible=True, observable=False, allow_children=True)
             resource.attributes = dict_att
             self.add_resource(base_path + "/" + path, resource)
 
@@ -251,7 +252,7 @@ class CoAP(object):
         self.stopped.set()
         for event in self.to_be_stopped:
             event.set()
-        self._socket.close()
+        # self._socket.close()
 
     def receive_datagram(self, args):
         """
@@ -272,7 +273,8 @@ class CoAP(object):
             rst.code = message
             self.send_datagram(rst)
             return
-        logger.debug("receive_datagram - " + str(message))
+
+        logger.info("receive_datagram - " + str(message))
         if isinstance(message, Request):
 
             transaction = self._messageLayer.receive_request(message)
@@ -318,6 +320,7 @@ class CoAP(object):
                 transaction = self._blockLayer.send_response(transaction)
 
                 transaction = self._cacheLayer.send_response(transaction)
+
             else:
                 transaction = self._forwardLayer.receive_request_reverse(transaction)
 
@@ -352,7 +355,7 @@ class CoAP(object):
         """
         if not self.stopped.isSet():
             host, port = message.destination
-            logger.debug("send_datagram - " + str(message))
+            logger.info("send_datagram - " + str(message))
             serializer = Serializer()
             message = serializer.serialize(message)
 
