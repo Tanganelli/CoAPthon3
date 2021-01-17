@@ -233,6 +233,7 @@ class BlockLayer(object):
 
                 self._block2_receive[key_token] = BlockItem(byte, num, m, size)
 
+                
             # correct m
             m = 0 if ((num * size) + size) > len(transaction.response.payload) else 1
             # add size2 if requested or if payload is bigger than one datagram
@@ -240,6 +241,7 @@ class BlockLayer(object):
             if (transaction.request.size2 is not None and transaction.request.size2 == 0) or \
                (transaction.response.payload is not None and len(transaction.response.payload) > defines.MAX_PAYLOAD):
                 transaction.response.size2 = len(transaction.response.payload)
+
             transaction.response.payload = transaction.response.payload[byte:byte + size]
             del transaction.response.block2
             transaction.response.block2 = (num, m, size)
