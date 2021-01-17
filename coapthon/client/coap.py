@@ -65,6 +65,13 @@ class CoAP(object):
 
         self._receiver_thread = None
 
+    def purge_transactions(self, timeout_time=defines.EXCHANGE_LIFETIME):
+        """
+        Clean old transactions
+
+        """
+        self._messageLayer.purge(timeout_time)
+
     def close(self):
         """
         Stop the client.
@@ -96,16 +103,21 @@ class CoAP(object):
         assert isinstance(c, int)
         self._currentMID = c
 
-    def send_message(self, message):
+    def send_message(self, message, no_response=False):
         """
         Prepare a message to send on the UDP socket. Eventually set retransmissions.
 
         :param message: the message to send
+        :param no_response: whether to await a response from the request
         """
         if isinstance(message, Request):
             request = self._requestLayer.send_request(message)
             request = self._observeLayer.send_request(request)
             request = self._blockLayer.send_request(request)
+            if no_response:
+                # don't add the send message to the message layer transactions
+                self.send_datagram(request)
+                return
             transaction = self._messageLayer.send_request(request)
             self.send_datagram(transaction.request)
             if transaction.request.type == defines.Types["CON"]:

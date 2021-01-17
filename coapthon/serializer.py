@@ -129,6 +129,9 @@ class Serializer(object):
             return defines.Codes.BAD_REQUEST.number
         except struct.error:
             return defines.Codes.BAD_REQUEST.number
+        except UnicodeDecodeError as e:
+            logger.debug(e)
+            return defines.Codes.BAD_REQUEST.number
 
     @staticmethod
     def serialize(message):

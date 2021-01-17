@@ -42,17 +42,17 @@ class MessageLayer(object):
         self._current_mid %= 65535
         return current_mid
 
-    def purge(self):
+    def purge(self, timeout_time=defines.EXCHANGE_LIFETIME):
         for k in list(self._transactions.keys()):
             now = time.time()
             transaction = self._transactions[k]
-            if transaction.timestamp + defines.EXCHANGE_LIFETIME < now:
+            if transaction.timestamp + timeout_time < now:
                 logger.debug("Delete transaction")
                 del self._transactions[k]
         for k in list(self._transactions_token.keys()):
             now = time.time()
             transaction = self._transactions_token[k]
-            if transaction.timestamp + defines.EXCHANGE_LIFETIME < now:
+            if transaction.timestamp + timeout_time < now:
                 logger.debug("Delete transaction")
                 del self._transactions_token[k]
 
