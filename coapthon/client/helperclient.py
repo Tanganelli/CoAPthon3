@@ -223,17 +223,26 @@ class HelperClient(object):
         :param request: the request to send
         :param callback: the callback function to invoke upon response
         :param timeout: the timeout of the request
+        :param no_response: whether to await a response from the request
         :return: the response
         """
         if callback is not None:
             thread = threading.Thread(target=self._thread_body, args=(request, callback))
             thread.start()
         else:
-            self.protocol.send_message(request)
+            self.protocol.send_message(request, no_response=no_response)
             if no_response:
                 return
             try:
-                response = self.queue.get(block=True, timeout=timeout)
+                while True:
+                    response = self.queue.get(block=True, timeout=timeout)
+                    if response is not None:
+                        if response.mid == request.mid:
+                            return response
+                        if response.type == defines.Types["NON"]:
+                            return response
+                    else:
+                        return response
             except Empty:
                 #if timeout is set
                 response = None
