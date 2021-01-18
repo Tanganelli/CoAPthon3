@@ -646,6 +646,7 @@ class Message(object):
         """
         self.del_option_by_number(defines.OptionRegistry.BLOCK2.number)
         
+    @property
     def size1(self):
         value = None
         for option in self.options:
