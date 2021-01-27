@@ -178,7 +178,7 @@ class CoAP(object):
                 if opt.value == 26:
                     return
 
-        if self._receiver_thread is None or not self._receiver_thread.isAlive():
+        if self._receiver_thread is None or not self._receiver_thread.is_alive():
             self._receiver_thread = threading.Thread(target=self.receive_datagram)
             self._receiver_thread.daemon = True
             self._receiver_thread.start()
