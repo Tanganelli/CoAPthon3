@@ -127,7 +127,7 @@ class Message(object):
             self._token = value
             return
         if not isinstance(value, bytes):
-            value = bytes(value)
+            value = bytes(value, 'utf-8')
 
         if len(value) > 256:
             raise AttributeError
@@ -645,7 +645,7 @@ class Message(object):
         Delete the Block2 option.
         """
         self.del_option_by_number(defines.OptionRegistry.BLOCK2.number)
-        
+
     @property
     def size1(self):
         value = None
