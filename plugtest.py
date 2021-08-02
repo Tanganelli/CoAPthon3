@@ -837,18 +837,12 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
         expected = Response()
         expected.type = defines.Types["ACK"]
         expected._mid = self.current_mid
-        expected.code = None
+        expected.code = defines.Codes.CONTENT.number
         expected.token = None
-
-        expected2 = Response()
-        expected2.type = defines.Types["CON"]
-        expected2._mid = None
-        expected2.code = defines.Codes.CONTENT.number
-        expected2.token = None
 
         self.current_mid += 1
 
-        self._test_plugtest([(req, None), (req, expected), (None, expected2)])
+        self._test_plugtest([(req, None), (req, expected)])
 
     def test_no_response(self):
         print("TEST_NO_RESPONSE")
@@ -864,18 +858,12 @@ I say, looked for all the world like a strip of that same patchwork quilt. Indee
         expected = Response()
         expected.type = defines.Types["ACK"]
         expected._mid = self.current_mid
-        expected.code = None
+        expected.code = defines.Codes.CONTENT.number
         expected.token = None
-
-        expected2 = Response()
-        expected2.type = defines.Types["CON"]
-        expected2._mid = None
-        expected2.code = defines.Codes.CONTENT.number
-        expected2.token = None
 
         self.current_mid += 1
 
-        self._test_plugtest([(req, expected), (None, expected2), (None, expected2),  (None, expected2)])
+        self._test_plugtest([(req, expected)])
 
     def test_edit_resource(self):
         print("TEST_EDIT_RESOURCE")
