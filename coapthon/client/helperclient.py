@@ -237,7 +237,7 @@ class HelperClient(object):
                 while True:
                     response = self.queue.get(block=True, timeout=timeout)
                     if response is not None:
-                        if response.mid == request.mid:
+                        if response.mid == request.mid or response.token == request.token:
                             return response
                         if response.type == defines.Types["NON"]:
                             return response
