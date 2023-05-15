@@ -59,7 +59,7 @@ class HelperClient(object):
         :param callback: the callback function
         """
         self.protocol.send_message(request)
-        while not self.protocol.stopped.isSet():
+        while not self.protocol.stopped.is_set():
             response = self.queue.get(block=True)
             callback(response)
 
