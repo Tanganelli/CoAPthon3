@@ -220,7 +220,7 @@ class CoAP(object):
         """
         Clean old transactions
         """
-        while not self.stopped.isSet():
+        while not self.stopped.is_set():
             self.stopped.wait(timeout=defines.EXCHANGE_LIFETIME)
             self._messageLayer.purge()
 
@@ -231,7 +231,7 @@ class CoAP(object):
         :param timeout: Socket Timeout in seconds
         """
         self._socket.settimeout(float(timeout))
-        while not self.stopped.isSet():
+        while not self.stopped.is_set():
             try:
                 data, client_address = self._socket.recvfrom(4096)
             except socket.timeout:
@@ -353,7 +353,7 @@ class CoAP(object):
         :type message: Message
         :param message: the message to send
         """
-        if not self.stopped.isSet():
+        if not self.stopped.is_set():
             host, port = message.destination
             logger.info("send_datagram - " + str(message))
             serializer = Serializer()
@@ -418,9 +418,9 @@ class CoAP(object):
         """
         with transaction:
             while retransmit_count < defines.MAX_RETRANSMIT and (not message.acknowledged and not message.rejected) \
-                    and not self.stopped.isSet():
+                    and not self.stopped.is_set():
                 transaction.retransmit_stop.wait(timeout=future_time)
-                if not message.acknowledged and not message.rejected and not self.stopped.isSet():
+                if not message.acknowledged and not message.rejected and not self.stopped.is_set():
                     retransmit_count += 1
                     future_time *= 2
                     self.send_datagram(message)

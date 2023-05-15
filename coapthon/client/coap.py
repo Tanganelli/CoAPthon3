@@ -215,9 +215,9 @@ class CoAP(object):
             logger.debug("retransmit loop ... enter")
             while retransmit_count <= defines.MAX_RETRANSMIT \
                     and (not message.acknowledged and not message.rejected) \
-                    and not transaction.retransmit_stop.isSet():
+                    and not transaction.retransmit_stop.is_set():
                 transaction.retransmit_stop.wait(timeout=future_time)
-                if not message.acknowledged and not message.rejected and not transaction.retransmit_stop.isSet():
+                if not message.acknowledged and not message.rejected and not transaction.retransmit_stop.is_set():
                     retransmit_count += 1
                     future_time *= 2
                     if retransmit_count < defines.MAX_RETRANSMIT:
@@ -247,7 +247,7 @@ class CoAP(object):
         Receive datagram from the UDP socket and invoke the callback function.
         """
         logger.debug("Start receiver Thread")
-        while not self.stopped.isSet():
+        while not self.stopped.is_set():
             self._socket.settimeout(0.1)
             try:
                 datagram, addr = self._socket.recvfrom(1500)
